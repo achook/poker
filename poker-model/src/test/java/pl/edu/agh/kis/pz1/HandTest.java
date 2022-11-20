@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class HandTest {
     @Test
-    public void compareDifferentHandTypes1() {
+    public void compareDifferentHandTypes() {
         Hand h1 = new Hand();
         Hand h2 = new Hand();
 
