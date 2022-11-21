@@ -3,7 +3,6 @@ package pl.edu.agh.kis.pz1;
 import java.util.ArrayList;
 import java.util.Collections;
 
-
 /**
  * Represents a player's hand.
  */
