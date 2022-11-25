@@ -5,8 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="235f8f3c-537d-4728-8ddb-1ab6db8d6c04" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poker-client/src/main/java/pl/edu/agh/kis/pz1/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/poker-client/src/main/java/pl/edu/agh/kis/pz1/Client.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poker-server/src/main/java/pl/edu/agh/kis/pz1/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/poker-server/src/main/java/pl/edu/agh/kis/pz1/Server.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,6 +25,14 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="7e551c81-10f9-4411-b2f7-73f0470def2d" />
+        <option name="url" value="git@github.com:achook/poker.git" />
+      </UrlAndAccount>
+    </option>
+  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -38,7 +47,9 @@
     <option name="selectedTabId" value="ProjectErrors" />
   </component>
   <component name="ProjectId" id="2HpDwcLQwoPiffSsGCY5cSPVWpJ" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -57,7 +68,8 @@
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm"
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "reference.settingsdialog.IDE.editor.colors.General"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -74,12 +86,21 @@
       <recent name="pl.edu.agh.kis.pz1" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.Test Model">
-    <configuration name="Run client" type="Application" factoryName="Application">
+  <component name="RunManager" selected="Application.Run client">
+    <configuration name="Run client" type="Application" factoryName="Application" singleton="false">
       <option name="ALTERNATIVE_JRE_PATH" value="openjdk-17" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="pl.edu.agh.kis.pz1.Client" />
       <module name="poker-client" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Run server" type="Application" factoryName="Application">
+      <option name="ALTERNATIVE_JRE_PATH" value="openjdk-17" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+      <option name="MAIN_CLASS_NAME" value="pl.edu.agh.kis.pz1.Server" />
+      <module name="poker-server" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -143,6 +164,7 @@
     </configuration>
     <list>
       <item itemvalue="Application.Run client" />
+      <item itemvalue="Application.Run server" />
       <item itemvalue="JUnit.Test Model" />
       <item itemvalue="JUnit.DeckTest" />
       <item itemvalue="JUnit.HandTest" />
@@ -165,7 +187,10 @@
       <workItem from="1668973374865" duration="958000" />
       <workItem from="1668974458235" duration="4000" />
       <workItem from="1668986184164" duration="41000" />
-      <workItem from="1668986226906" duration="2786000" />
+      <workItem from="1668986226906" duration="2980000" />
+      <workItem from="1669161605887" duration="467000" />
+      <workItem from="1669402161112" duration="71000" />
+      <workItem from="1669402276987" duration="6008000" />
     </task>
     <servers />
   </component>
@@ -182,5 +207,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>
