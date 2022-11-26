@@ -5,6 +5,7 @@ import java.io.Serial;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 public class Client {
@@ -16,26 +17,47 @@ public class Client {
         buffer = ByteBuffer.allocate(256);
     }
 
-    public static String sendMessage(String msg) throws IOException {
-        buffer = ByteBuffer.wrap(msg.getBytes());
-
+    public static String sendAndGet(String msg) throws IOException {
+        var buffer = ByteBuffer.wrap(msg.getBytes());
         client.write(buffer);
-        buffer.clear();
 
-        client.read(buffer);
-        String response = new String(buffer.array()).trim();
-
-        buffer.clear();
+        var buffer2 = ByteBuffer.allocate(256);
+        client.read(buffer2);
+        String response = new String(buffer2.array()).trim();
 
         return response;
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void send(String msg) throws IOException {
+        var buffer = ByteBuffer.wrap(msg.getBytes());
+        client.write(buffer);
+    }
+
+    public static String get() throws IOException {
+        var buffer2 = ByteBuffer.allocate(256);
+        client.read(buffer2);
+        return new String(buffer2.array()).trim();
+    }
+
+    public static void main(String[] args) throws InterruptedException, IOException {
         start();
 
-        for (int i = 0; i < 10; i++) {
-            sendMessage(i+"");
-            TimeUnit.SECONDS.sleep(1);
+        // GET ID
+        String id = sendAndGet("BEGIN");
+
+        System.out.println(id);
+
+        // GET MAX
+        String start = get();
+
+        System.out.println(start);
+
+        // GET 5 CARDS
+        for (int i = 0; i < 5; i++) {
+            String card = get();
+            System.out.println(card);
         }
+
+        while (true) {}
     }
 }

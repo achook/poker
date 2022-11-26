@@ -52,4 +52,12 @@ public class Game {
         pot = ante * numberOfPlayers;
 
     }
+
+    public Hand getHand(int player) {
+        return players[player].getHand();
+    }
+
+    public int getDealerID() {
+        return dealer;
+    }
 }

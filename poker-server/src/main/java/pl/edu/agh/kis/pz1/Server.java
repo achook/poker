@@ -10,7 +10,9 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class Server {
     private static ServerSocketChannel serverSocketChannel;
@@ -41,22 +43,45 @@ public class Server {
         }
     }
 
-    private static String readAndAnswer(String message, SelectionKey key)
-            throws IOException {
+    private static void readAndAnswer(String message, SelectionKey key)
+            throws IOException, InterruptedException {
 
-        var buffer = ByteBuffer.allocate(256);
-
+        buffer = ByteBuffer.allocate(256);
         SocketChannel client = (SocketChannel) key.channel();
+        buffer.clear();
 
-        client.read(buffer);
-        String response = new String(buffer.array()).trim();
+        while ((client.read(buffer)) > 0) {}
+
+        buffer.clear();
+        buffer.put(message.getBytes());
+        buffer.flip();
+
+        while (buffer.hasRemaining()) {
+            client.write (buffer);
+        }
+    }
+
+    private static void send(String message, SelectionKey key) throws IOException {
+        buffer = ByteBuffer.allocate(256);
+        SocketChannel client = (SocketChannel) key.channel();
         buffer.clear();
 
         buffer.put(message.getBytes());
-        client.write(buffer);
+        buffer.flip();
+
+        while (buffer.hasRemaining()) {
+            client.write (buffer);
+        }
+    }
+
+    private static String read(SelectionKey key) throws IOException {
+        buffer = ByteBuffer.allocate(256);
+        SocketChannel client = (SocketChannel) key.channel();
         buffer.clear();
 
-        return response;
+        while (client.read(buffer) > 0) {}
+
+        return new String(buffer.array()).trim();
     }
 
     private static void register(Selector selector, ServerSocketChannel serverSocket)
@@ -64,33 +89,25 @@ public class Server {
 
         SocketChannel client = serverSocket.accept();
         client.configureBlocking(false);
-        client.register(selector, SelectionKey.OP_READ);
+        client.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
     }
 
-    public static void main(String[] args) throws InternalServerException, IOException {
-        Deck d = new Deck();
-        Hand h = new Hand();
-
-        for (int i = 0; i < 5; i++) {
-            Card c = d.getFromTop();
-            h.addCard(c);
-
-        }
-
-        ArrayList<Card> cs = h.getCards();
-
-        for (int i = 0; i < 5; i++) {
-            System.out.println(cs.get(i).getName());
-        }
+    public static void main(String[] args) throws InternalServerException, IOException, InterruptedException {
 
         startServer(8090);
 
-        while (true) {
+        var maxPlayers = 2;
+
+        // WAIT FOR PLAYERS
+        var currentID = 0;
+        Map<Integer, SelectionKey> players = new java.util.HashMap<>(Map.of());
+
+        while (currentID < maxPlayers) {
             selector.select();
+
             Set<SelectionKey> selectedKeys = selector.selectedKeys();
             Iterator<SelectionKey> iter = selectedKeys.iterator();
             while (iter.hasNext()) {
-
                 SelectionKey key = iter.next();
 
                 if (key.isAcceptable()) {
@@ -98,10 +115,41 @@ public class Server {
                 }
 
                 if (key.isReadable()) {
-                    readAndAnswer("Read", key);
+                    readAndAnswer("ID " + currentID, key);
+                    players.put(currentID, key);
+                    currentID++;
                 }
+
                 iter.remove();
             }
         }
+
+        System.out.println(players);
+        // GAME STARTS
+
+        var startingMoney = 1000;
+        var ante = 10;
+
+        var game = new Game(maxPlayers, ante);
+
+        // SEND STARTING MONEY
+        for (var player : players.entrySet()) {
+            send("START " + startingMoney, player.getValue());
+        }
+
+        // SEND CARDS
+        for (var player : players.entrySet()) {
+            var cards = game.getHand(player.getKey()).getCards();
+
+            for (var card : cards) {
+                send("CARD " + card.toSCP() + "\n", player.getValue());
+            }
+        }
+
+        // SEND DEALER ID
+        for (var player : players.entrySet()) {
+            send("DEALER " + game.getDealerID(), player.getValue());
+        }
+
     }
 }

@@ -1,0 +1,7 @@
+PROTOKÓŁ KOMUNIKACJI
+
+BEGIN
+
+ID <id>
+
+START <money>
