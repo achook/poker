@@ -41,6 +41,41 @@ public class Card implements Comparable<Card> {
         rank = r;
     }
 
+    static Card fromSCP(String scp) {
+        var s = scp.charAt(0);
+        var r = scp.charAt(1);
+
+        CardSuite suite;
+        CardRank rank;
+
+        switch (s) {
+            case 'H' -> suite = CardSuite.HEARTS;
+            case 'D' -> suite = CardSuite.DIAMONDS;
+            case 'C' -> suite = CardSuite.CLUBS;
+            case 'S' -> suite = CardSuite.SPADES;
+            default -> throw new IllegalArgumentException("Invalid suite: " + s);
+        }
+
+        switch (r) {
+            case '2' -> rank = CardRank.TWO;
+            case '3' -> rank = CardRank.THREE;
+            case '4' -> rank = CardRank.FOUR;
+            case '5' -> rank = CardRank.FIVE;
+            case '6' -> rank = CardRank.SIX;
+            case '7' -> rank = CardRank.SEVEN;
+            case '8' -> rank = CardRank.EIGHT;
+            case '9' -> rank = CardRank.NINE;
+            case 'T' -> rank = CardRank.TEN;
+            case 'J' -> rank = CardRank.JACK;
+            case 'Q' -> rank = CardRank.QUEEN;
+            case 'K' -> rank = CardRank.KING;
+            case 'A' -> rank = CardRank.ACE;
+            default -> throw new IllegalArgumentException("Invalid rank: " + r);
+        }
+
+        return new Card(suite, rank);
+    }
+
     @Override
     public int compareTo(Card c) {
         return rank.compareTo(c.rank);

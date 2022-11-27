@@ -196,6 +196,15 @@ public class Hand implements Comparable<Hand> {
         cards.remove(i);
     }
 
+    public void removeCards(ArrayList<Integer> indices) {
+        var toRemove = new ArrayList<Card>();
+        for (var i : indices) {
+            toRemove.add(cards.get(i));
+        }
+
+        cards.removeAll(toRemove);
+    }
+
     /**
      * Adds a card to this hand and sorts it.
      * @param c card to add.
