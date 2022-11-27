@@ -69,6 +69,18 @@ public class Server {
     }
 
     /**
+     * Sends a message to all clients.
+     * @param message message to send
+     * @param keys clients keys
+     * @throws IOException if an I/O error occurs
+     */
+    private static void sendToAll(String message, Collection<SelectionKey> keys) throws IOException {
+        for (SelectionKey key : keys) {
+            send(message, key);
+        }
+    }
+
+    /**
      * Receives a message from the client.
      * @param key client key
      * @return received message
@@ -98,6 +110,65 @@ public class Server {
         SocketChannel client = serverSocket.accept();
         client.configureBlocking(false);
         client.register(selector, client.validOps());
+    }
+
+    /**
+     * Plays a single round.
+     * @param players players
+     * @param game game
+     * @throws IOException if an I/O error occurs
+     */
+    private static void playARound(Map<Integer, SelectionKey> players, Game game) throws IOException {
+        while (!game.isRoundFinished()) {
+            // Check which players turn is it
+            var currentPlayerID = game.getCurrentPlayerID();
+
+            // Inform all the players
+            for (var player : players.entrySet()) {
+                send("TURN " + currentPlayerID, player.getValue());
+            }
+
+            // Wait for the current player to make a move
+            String bet = "";
+            while (!bet.contains("BET")) {
+                bet = read(players.get(currentPlayerID));
+            }
+
+            var rawBetElements = bet.split(" ");
+            var betType = rawBetElements[1];
+
+            Game.Move move = null;
+            int amount = -1;
+
+            while (move == null) {
+                if (betType.contains("FOLD")) {
+                    move = Game.Move.FOLD;
+
+                } else if (betType.contains("CALL")) {
+                    move = Game.Move.CALL;
+
+                } else if (betType.contains("RAISE")) {
+                    move = Game.Move.RAISE;
+                    amount = Integer.parseInt(rawBetElements[2]);
+
+                } else if (betType.contains("CHECK")) {
+                    move = Game.Move.CHECK;
+                }
+
+                if (!game.isMoveLegal(currentPlayerID, move) | move == null) {
+                    send("ILLEGAL", players.get(currentPlayerID));
+                }
+            }
+
+            game.makeMove(currentPlayerID, move, amount);
+
+            // Send bet to other players
+            for (var player : players.entrySet()) {
+                if (player.getKey() != currentPlayerID) {
+                    send("BET " + currentPlayerID + " " + betType, player.getValue());
+                }
+            }
+        }
     }
 
     public static void main(String[] args) throws InternalServerException, IOException, InterruptedException {
@@ -134,212 +205,117 @@ public class Server {
         }
         TimeUnit.MILLISECONDS.sleep(100);
 
-        for (var player : players.entrySet()) {
-            send("BEGIN", player.getValue());
-        }
-        TimeUnit.MILLISECONDS.sleep(100);
+        var gameInProgress = true;
+        while (gameInProgress) {
 
-
-        System.out.println(players);
-        // GAME STARTS
-
-        var startingMoney = 1000;
-        var ante = 10;
-
-        var game = new Game(numberOfAllPlayers, ante);
-
-        // SEND ANTE
-        for (var player : players.entrySet()) {
-            send("ANTE " + ante, player.getValue());
-        }
-        TimeUnit.MILLISECONDS.sleep(100);
-
-        // SEND STARTING MONEY
-        for (var player : players.entrySet()) {
-            send("MONEY " + startingMoney, player.getValue());
-        }
-        TimeUnit.MILLISECONDS.sleep(100);
-
-        // SEND CARDS
-        for (var player : players.entrySet()) {
-            var cards = game.getHand(player.getKey()).getCards();
-
-            for (var card : cards) {
-                send("CARD " + card.toSCP() + "\n", player.getValue());
-                TimeUnit.MILLISECONDS.sleep(50);
-            }
-        }
-
-        // SEND DEALER ID
-        for (var player : players.entrySet()) {
-            send("DEALER " + game.getDealerID(), player.getValue());
-        }
-        TimeUnit.MILLISECONDS.sleep(100);
-
-
-        while (!game.isRoundFinished()) {
-            // Check which players turn is it
-            var currentPlayerID = game.getCurrentPlayerID();
-
-            // Inform all the players
             for (var player : players.entrySet()) {
-                send("TURN " + currentPlayerID, player.getValue());
+                send("BEGIN", player.getValue());
             }
+            TimeUnit.MILLISECONDS.sleep(100);
 
-            // Wait for the current player to make a move
-            String bet = "";
-            while (!bet.contains("BET")) {
-                bet = read(players.get(currentPlayerID));
-            }
 
-            var rawBetElements = bet.split(" ");
-            var betType = rawBetElements[1];
+            System.out.println(players);
+            // GAME STARTS
 
-            Game.Move move = null;
-            int amount = -1;
+            var startingMoney = 1000;
+            var ante = 10;
 
-            while (move == null) {
-                if (betType.contains("FOLD")) {
-                    move = Game.Move.FOLD;
+            var game = new Game(numberOfAllPlayers, ante);
 
-                } else if (betType.contains("CALL")) {
-                    move = Game.Move.CALL;
-
-                } else if (betType.contains("RAISE")) {
-                    move = Game.Move.RAISE;
-                    amount = Integer.parseInt(rawBetElements[2]);
-
-                } else if (betType.contains("CHECK")) {
-                    move = Game.Move.CHECK;
-                }
-
-                if (!game.isMoveLegal(currentPlayerID, move) | move == null) {
-                    send("ILLEGAL", players.get(currentPlayerID));
-                }
-            }
-
-            game.makeMove(currentPlayerID, move, amount);
-
-            // Send bet to other players
+            // SEND ANTE
             for (var player : players.entrySet()) {
-                if (player.getKey() != currentPlayerID) {
-                    send("BET " + currentPlayerID + " " + betType, player.getValue());
-                }
+                send("ANTE " + ante, player.getValue());
             }
-        }
+            TimeUnit.MILLISECONDS.sleep(100);
 
-        // INFORM THAT ROUND IS FINISHED
-        for (var player : players.entrySet()) {
-            send("FINISHED 1", player.getValue());
-        }
-
-        game.endFirstRound();
-
-        // REPLACE CARDS
-        var replacedForPlayers = 0;
-
-        while (replacedForPlayers < numberOfAllPlayers) {
+            // SEND STARTING MONEY
             for (var player : players.entrySet()) {
-                var cardsToReplace = read(player.getValue());
-                var indexes = new ArrayList<Integer>();
+                send("MONEY " + startingMoney, player.getValue());
+            }
+            TimeUnit.MILLISECONDS.sleep(100);
 
-                var rawIndexes = cardsToReplace.split(" ");
-                if (!rawIndexes[0].contains("REPLACE")) {
-                    continue;
-                }
+            // SEND CARDS
+            for (var player : players.entrySet()) {
+                var cards = game.getHand(player.getKey()).getCards();
 
-                replacedForPlayers++;
-
-                for (var i = 1; i < rawIndexes.length; i++) {
-                    indexes.add(Integer.parseInt(rawIndexes[i]));
-                }
-
-                game.replaceCards(player.getKey(), indexes);
-
-                for (var card : game.getHand(player.getKey()).getCards()) {
+                for (var card : cards) {
                     send("CARD " + card.toSCP() + "\n", player.getValue());
                     TimeUnit.MILLISECONDS.sleep(50);
                 }
             }
-        }
 
-        // SECOND ROUND
-        while (!game.isRoundFinished()) {
-            // Check which players turn is it
-            var currentPlayerID = game.getCurrentPlayerID();
-
-            // Inform all the players
+            // SEND DEALER ID
             for (var player : players.entrySet()) {
-                send("TURN " + currentPlayerID, player.getValue());
+                send("DEALER " + game.getDealerID(), player.getValue());
             }
+            TimeUnit.MILLISECONDS.sleep(100);
 
-            // Wait for the current player to make a move
-            String bet = "";
-            while (!bet.contains("BET")) {
-                bet = read(players.get(currentPlayerID));
-            }
 
-            var rawBetElements = bet.split(" ");
-            var betType = rawBetElements[1];
+            playARound(players, game);
 
-            Game.Move move = null;
-            int amount = -1;
+            // INFORM THAT ROUND IS FINISHED
+            sendToAll("FINISHED 1", players.values());
 
-            while (move == null) {
-                if (betType.contains("FOLD")) {
-                    move = Game.Move.FOLD;
+            game.endFirstRound();
 
-                } else if (betType.contains("CALL")) {
-                    move = Game.Move.CALL;
+            // REPLACE CARDS
+            var replacedForPlayers = 0;
 
-                } else if (betType.contains("RAISE")) {
-                    move = Game.Move.RAISE;
-                    amount = Integer.parseInt(rawBetElements[2]);
+            while (replacedForPlayers < numberOfAllPlayers) {
+                for (var player : players.entrySet()) {
+                    var cardsToReplace = read(player.getValue());
+                    var indexes = new ArrayList<Integer>();
 
-                } else if (betType.contains("CHECK")) {
-                    move = Game.Move.CHECK;
+                    var rawIndexes = cardsToReplace.split(" ");
+                    if (!rawIndexes[0].contains("REPLACE")) {
+                        continue;
+                    }
+
+                    replacedForPlayers++;
+
+                    for (var i = 1; i < rawIndexes.length; i++) {
+                        indexes.add(Integer.parseInt(rawIndexes[i]));
+                    }
+
+                    game.replaceCards(player.getKey(), indexes);
+
+                    for (var card : game.getHand(player.getKey()).getCards()) {
+                        send("CARD " + card.toSCP() + "\n", player.getValue());
+                        TimeUnit.MILLISECONDS.sleep(50);
+                    }
                 }
-
-                if (!game.isMoveLegal(currentPlayerID, move) | move == null) {
-                    send("ILLEGAL", players.get(currentPlayerID));
-                }
             }
 
-            game.makeMove(currentPlayerID, move, amount);
+            // SECOND ROUND
+            playARound(players, game);
 
-            // Send bet to other players
+
+            sendToAll("FINISHED 2", players.values());
+            TimeUnit.MILLISECONDS.sleep(100);
+
+            var winner = game.endSecondRound();
+            System.out.println("The winner is " + winner);
+
+            // SEND WINNER
+            sendToAll("WINNER " + winner, players.values());
+            TimeUnit.MILLISECONDS.sleep(100);
+
+            // SEND BALANCES
             for (var player : players.entrySet()) {
-                if (player.getKey() != currentPlayerID) {
-                    send("BET " + currentPlayerID + " " + betType, player.getValue());
-                }
+                send("BALANCE " + game.getBalance(player.getKey()), player.getValue());
             }
-        }
+            TimeUnit.MILLISECONDS.sleep(100);
 
+            // INFORM THAT GAME IS FINISHED
+            for (var player : players.entrySet()) {
+                send("END", player.getValue());
+            }
 
-        for (var player : players.entrySet()) {
-            send("FINISHED 2", player.getValue());
-        }
-        TimeUnit.MILLISECONDS.sleep(100);
-
-        var winner = game.endSecondRound();
-
-        System.out.println("The winner is " + winner);
-
-        // SEND WINNER
-        for (var player : players.entrySet()) {
-            send("WINNER " + winner, player.getValue());
-        }
-        TimeUnit.MILLISECONDS.sleep(100);
-
-        // SEND BALANCES
-        for (var player : players.entrySet()) {
-            send("BALANCE " + game.getBalance(player.getKey()), player.getValue());
-        }
-        TimeUnit.MILLISECONDS.sleep(100);
-
-        // INFORM THAT GAME IS FINISHED
-        for (var player : players.entrySet()) {
-            send("END", player.getValue());
+            if (true) {
+                game.prepareNewGame();
+            } else {
+                gameInProgress = false;
+            }
         }
 
     }

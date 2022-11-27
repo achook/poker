@@ -18,7 +18,7 @@ public class Game {
         SECOND
     }
 
-    private Player[] players;
+    Player[] players;
     private int numberOfPlayers;
 
     private Deck deck;
@@ -27,7 +27,7 @@ public class Game {
     private int dealerIndex;
 
 
-    private int pot;
+    int pot;
     private int currentBet;
 
     private boolean canCheck = true;
@@ -54,6 +54,7 @@ public class Game {
         }
 
         dealerIndex = 0;
+        currentPlayerIndex = 1;
 
         pot = ante * numberOfPlayers;
 
@@ -237,24 +238,40 @@ public class Game {
             return false;
         }
 
-        if (move == Move.FOLD) {
-            return true;
-        }
-
-        if (move == Move.CHECK) {
-            return canCheck;
-        }
-
-        if (move == Move.CALL) {
-            return players[playerID].money >= currentBet - players[playerID].lastBet;
-        }
-
-        if (move == Move.RAISE) {
-            return players[playerID].money >= currentBet - players[playerID].lastBet + 1;
+        switch (move) {
+            case FOLD -> {
+                return true;
+            }
+            case CHECK -> {
+                return canCheck;
+            }
+            case CALL -> {
+                return players[playerID].money >= currentBet - players[playerID].lastBet;
+            }
+            case RAISE -> {
+                return players[playerID].money >= currentBet - players[playerID].lastBet + 1;
+            }
         }
 
         return false;
     }
 
+    public void prepareNewGame() {
+        deck = new Deck();
 
+        for (var player : players) {
+            player.hasFolded = false;
+            player.lastBet = 0;
+        }
+
+        dealerIndex = (dealerIndex + 1) % numberOfPlayers;
+        currentPlayerIndex = dealerIndex;
+        nextPlayer();
+
+        currentBet = 0;
+        pot = 0;
+
+        canCheck = true;
+        lastPlayerIndexToRaise = -1;
+    }
 }

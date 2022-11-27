@@ -1,5 +1,6 @@
 package pl.edu.agh.kis.pz1;
 
+import pl.edu.agh.kis.pz1.Utilities;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -50,19 +51,19 @@ public class Client {
 
         // GET ID
         String idString = get();
-        int id = Integer.parseInt(idString.split(" ")[1]);
+        int id = Utilities.getArgument(idString);
 
         // GET BEGIN
         String beginString = get();
 
         // GET ANTE
         String anteString = get();
-        int ante = Integer.parseInt(anteString.split(" ")[1]);
+        int ante = Utilities.getArgument(anteString);
         System.out.println("Ante: " + ante);
 
         // GET MAX
         String startMoneyString = get();
-        int startMoney = Integer.parseInt(startMoneyString.split(" ")[1]);
+        int startMoney = Utilities.getArgument(startMoneyString);
         System.out.println("Start money: " + startMoney);
 
         var h = new Hand();
@@ -78,7 +79,7 @@ public class Client {
 
         // GET DEALER
         String dealerString = get();
-        int dealer = Integer.parseInt(dealerString.split(" ")[1]);
+        int dealer = Utilities.getArgument(dealerString);
         System.out.println("Dealer: " + dealer);
 
         String incoming = "";
@@ -86,7 +87,7 @@ public class Client {
             incoming = get();
 
             if (incoming.contains("TURN")) {
-                var whoseTurn = Integer.parseInt(incoming.split(" ")[1]);
+                var whoseTurn = Utilities.getArgument(incoming);
 
                 if (whoseTurn == id) {
                     System.out.println("YOUR TURN");
@@ -99,7 +100,7 @@ public class Client {
             }
 
             if (incoming.contains("BET")) {
-                var betMaker = Integer.parseInt(incoming.split(" ")[1]);
+                var betMaker = Utilities.getArgument(incoming);
                 var betType = incoming.split(" ")[2];
 
                 System.out.println("Player " + betMaker + " " + betType);
@@ -127,7 +128,7 @@ public class Client {
             incoming = get();
 
             if (incoming.contains("TURN")) {
-                var whoseTurn = Integer.parseInt(incoming.split(" ")[1]);
+                var whoseTurn = Utilities.getArgument(incoming);
 
                 if (whoseTurn == id) {
                     System.out.println("YOUR TURN");
@@ -140,7 +141,7 @@ public class Client {
             }
 
             if (incoming.contains("BET")) {
-                var betMaker = Integer.parseInt(incoming.split(" ")[1]);
+                var betMaker = Utilities.getArgument(incoming);
                 var betType = incoming.split(" ")[2];
 
                 System.out.println("Player " + betMaker + " " + betType);
@@ -149,12 +150,12 @@ public class Client {
 
         // GET WINNER
         String winnerString = get();
-        int winner = Integer.parseInt(winnerString.split(" ")[1]);
+        int winner = Utilities.getArgument(winnerString);
         System.out.println("Winner: " + winner);
 
         // GET MONEY
         String moneyString = get();
-        int money = Integer.parseInt(moneyString.split(" ")[1]);
+        int money = Utilities.getArgument(moneyString);
         System.out.println("Money: " + money);
 
         // GET END

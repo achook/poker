@@ -8,12 +8,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="235f8f3c-537d-4728-8ddb-1ab6db8d6c04" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javadoc/element-list" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/javadoc/legal/ADDITIONAL_LICENSE_INFO" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/javadoc/legal/ASSEMBLY_EXCEPTION" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/javadoc/legal/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/poker-client/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/poker-client/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poker-client/src/main/java/pl/edu/agh/kis/pz1/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/poker-client/src/main/java/pl/edu/agh/kis/pz1/Client.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poker-common/src/main/java/pl/edu/agh/kis/pz1/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/poker-common/src/main/java/pl/edu/agh/kis/pz1/Utilities.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poker-model/src/main/java/pl/edu/agh/kis/pz1/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/poker-model/src/main/java/pl/edu/agh/kis/pz1/Game.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poker-model/src/test/java/pl/edu/agh/kis/pz1/GameTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/poker-model/src/test/java/pl/edu/agh/kis/pz1/GameTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poker-server/src/main/java/pl/edu/agh/kis/pz1/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/poker-server/src/main/java/pl/edu/agh/kis/pz1/Server.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poker-server/src/test/java/pl/edu/agh/kis/pz1/ServerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/poker-server/src/test/java/pl/edu/agh/kis/pz1/ServerTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,7 +52,7 @@
     </option>
   </component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="ProjectErrors" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectId" id="2HpDwcLQwoPiffSsGCY5cSPVWpJ" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
@@ -68,6 +70,7 @@
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary&quot;: &quot;JUnit5&quot;,
     &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5&quot;: &quot;&quot;,
+    &quot;extract.method.default.visibility&quot;: &quot;private&quot;,
     &quot;jdk.selected.JAVA_MODULE&quot;: &quot;openjdk-17&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/karol/Documents/Uni/pz1/new/poker/poker-server/src/main/java/pl/edu/agh/kis/pz1&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -160,7 +163,8 @@
       <workItem from="1669161605887" duration="467000" />
       <workItem from="1669402161112" duration="71000" />
       <workItem from="1669402276987" duration="26372000" />
-      <workItem from="1669494797481" duration="27968000" />
+      <workItem from="1669494797481" duration="29245000" />
+      <workItem from="1669587854045" duration="1923000" />
     </task>
     <servers />
   </component>
@@ -184,6 +188,6 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="../../../../Documents/Uni/pz1/poker/poker-model/target/jacoco.exec" NAME="jacoco.exec" MODIFIED="1669416099463" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="jacoco" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
-    <SUITE FILE_PATH="coverage/poker$Test_all.ic" NAME="Test all Coverage Results" MODIFIED="1669581625170" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/poker$Test_all.ic" NAME="Test all Coverage Results" MODIFIED="1669590048593" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
   </component>
 </project>

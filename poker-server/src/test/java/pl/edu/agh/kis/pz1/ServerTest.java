@@ -10,12 +10,12 @@ class ServerTest {
 
     @Test
     void testStartServer() throws InternalServerException, IOException {
-        Server.startServer(9999);
+        Server.startServer(9898);
     }
 
     @Test
     void testStopServer() throws InternalServerException, IOException {
-        Server.startServer(9999);
+        Server.startServer(8989);
         Server.stopServer();
 
     }
