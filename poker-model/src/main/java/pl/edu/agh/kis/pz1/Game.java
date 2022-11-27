@@ -1,9 +1,6 @@
 package pl.edu.agh.kis.pz1;
 
-
-import java.sql.Array;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Represents the current state of the game of poker.
@@ -22,19 +19,20 @@ public class Game {
     }
 
     private Player[] players;
-    private int dealer;
-    private int currentPlayer;
-
     private int numberOfPlayers;
+
+    private Deck deck;
+
+    private int currentPlayerIndex;
+    private int dealerIndex;
+
 
     private int pot;
     private int currentBet;
-    private Deck deck;
 
     private boolean canCheck = true;
-    private int lastToRaise = -1;
+    private int lastPlayerIndexToRaise = -1;
 
-    private Round currentRound = Round.FIRST;
 
     public Game(int numberOfPlayers, int ante) {
         this.numberOfPlayers = numberOfPlayers;
@@ -55,7 +53,7 @@ public class Game {
             players[i].setHand(h);
         }
 
-        dealer = 0;
+        dealerIndex = 0;
 
         pot = ante * numberOfPlayers;
 
@@ -66,25 +64,33 @@ public class Game {
     }
 
     public int getDealerID() {
-        return dealer;
+        return dealerIndex;
     }
 
     public int getCurrentPlayerID() {
-        return currentPlayer;
+        return currentPlayerIndex;
     }
 
+    /**
+     * Calculates which player is next to play.
+     * Updates currentPlayer field.
+     */
     private void nextPlayer() {
-        System.out.println("Before: " + currentPlayer);
+        System.out.println("Before: " + currentPlayerIndex);
         while (true) {
-            currentPlayer = (currentPlayer + 1) % numberOfPlayers;
+            currentPlayerIndex = (currentPlayerIndex + 1) % numberOfPlayers;
 
-            if (!players[currentPlayer].hasFolded) {
-                System.out.println("After: " + currentPlayer);
+            if (!players[currentPlayerIndex].hasFolded) {
+                System.out.println("After: " + currentPlayerIndex);
                 return;
             }
         }
     }
 
+    /**
+     * Calls
+     * @param playerID ID of the player who is calling
+     */
     public void call(int playerID) {
         players[playerID].money -= (currentBet - players[playerID].lastBet);
         pot += (currentBet - players[playerID].lastBet);
@@ -93,26 +99,59 @@ public class Game {
         nextPlayer();
     }
 
+    /**
+     * Raises the bet by the given amount.
+     * @param playerID ID of the player who is raising.
+     * @param amount Amount by which the bet is raised.
+     */
     public void raise(int playerID, int amount) {
         players[playerID].money -= amount;
         pot += amount;
         currentBet += amount;
         players[playerID].lastBet = amount;
-        lastToRaise = playerID;
+        lastPlayerIndexToRaise = playerID;
+        canCheck = false;
 
         nextPlayer();
     }
 
+    /**
+     * Folds the player's hand.
+     * @param playerID ID of the player who is folding.
+     */
     public void fold(int playerID) {
         players[playerID].hasFolded = true;
 
         nextPlayer();
     }
 
+    /**
+     * Checks
+     * @param playerID ID of the player who is checking.
+     */
     public void check(int playerID) {
         nextPlayer();
     }
 
+    public void makeMove(int playerID, Move move) {
+        switch (move) {
+            case FOLD -> fold(playerID);
+            case CHECK -> check(playerID);
+            case CALL -> call(playerID);
+        }
+    }
+
+    public void makeMove(int playerID, Move move, int amount) {
+        switch (move) {
+            case RAISE -> raise(playerID, amount);
+            default -> makeMove(playerID, move);
+        }
+    }
+
+    /**
+     * Gets the players who are still in the game.
+     * @return List of players who are still in the game.
+     */
     public ArrayList<Player> getPlayersInGame() {
         var playersInGame = new ArrayList<Player>();
         for (var player : players) {
@@ -124,17 +163,31 @@ public class Game {
         return playersInGame;
     }
 
+    /**
+     * Ends the first round of betting.
+     * Prepares the game for the second round.
+     */
     void endFirstRound() {
-        currentRound = Round.SECOND;
-        lastToRaise = -1;
+        lastPlayerIndexToRaise = -1;
+        currentPlayerIndex = dealerIndex;
+        nextPlayer();
     }
 
+    /**
+     * Replaces the cards of the given player.
+     * @param playerID ID of the player who is replacing the cards.
+     * @param cardIndexes Indexes of the cards to be replaced.
+     */
     void replaceCards(int playerID, ArrayList<Integer> cardIndexes) {
 
         players[playerID].getHand().removeCards(cardIndexes);
         players[playerID].getHand().addCards(deck.getFromTop(cardIndexes.size()));
     }
 
+    /**
+     * Ends the second round of betting.
+     * Prepares the game for the showdown.
+     */
     public int endSecondRound() {
         var bestHand = getPlayersInGame().get(0).getHand();
         var bestPlayerID = 0;
@@ -153,12 +206,16 @@ public class Game {
         return bestPlayerID;
     }
 
+    /**
+     * Checks if the game is over.
+     * @return True if the game is over, false otherwise.
+     */
     public boolean isRoundFinished() {
         if (getPlayersInGame().size() == 1) {
             return true;
         }
 
-        if (lastToRaise == currentPlayer) {
+        if (lastPlayerIndexToRaise == currentPlayerIndex) {
             return true;
         }
 
@@ -167,6 +224,36 @@ public class Game {
 
     public int getBalance(int playerID) {
         return players[playerID].money;
+    }
+
+    /**
+     * Checks if the given move is valid for the given player at the moment the method is called.
+     * @param playerID ID of the player who is making the move.
+     * @param move Move to be checked.
+     * @return True if the move is valid, false otherwise.
+     */
+    public boolean isMoveLegal(int playerID, Move move) {
+        if (playerID != currentPlayerIndex) {
+            return false;
+        }
+
+        if (move == Move.FOLD) {
+            return true;
+        }
+
+        if (move == Move.CHECK) {
+            return canCheck;
+        }
+
+        if (move == Move.CALL) {
+            return players[playerID].money >= currentBet - players[playerID].lastBet;
+        }
+
+        if (move == Move.RAISE) {
+            return players[playerID].money >= currentBet - players[playerID].lastBet + 1;
+        }
+
+        return false;
     }
 
 

@@ -5,7 +5,6 @@ public class Player {
     int money;
     private Hand hand;
     boolean hasFolded;
-    private boolean currentBet;
     int lastBet;
 
     private Game game;

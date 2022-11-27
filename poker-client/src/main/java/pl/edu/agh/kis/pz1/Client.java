@@ -3,52 +3,50 @@ package pl.edu.agh.kis.pz1;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Serial;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 
+/**
+ * Represents a poker client.
+ */
 public class Client {
     private static SocketChannel client;
-    private static ByteBuffer buffer;
 
-    public static void start() throws IOException {
-        client = SocketChannel.open(new InetSocketAddress("localhost", 8090));
+    /**
+     * Connects to the server.
+     * @param port server port
+     * @throws IOException if an I/O error occurs
+     */
+    public static void start(int port) throws IOException {
+        client = SocketChannel.open(new InetSocketAddress("localhost", port));
         // client.configureBlocking(false);
-        buffer = ByteBuffer.allocate(256);
     }
 
-    public static String sendAndGet(String msg) throws IOException {
-        var buffer = ByteBuffer.wrap(msg.getBytes());
+    /**
+     * Sends a message to the server.
+     * @param message message to send
+     * @throws IOException if an I/O error occurs
+     */
+    public static void send(String message) throws IOException {
+        var buffer = ByteBuffer.wrap(message.getBytes());
         client.write(buffer);
-        buffer.clear();
-
-        var buffer2 = ByteBuffer.allocate(256);
-        client.read(buffer2);
-        String response = new String(buffer2.array()).trim();
-        buffer2.clear();
-
-        return response;
     }
 
-    public static void send(String msg) throws IOException {
-        var buffer = ByteBuffer.wrap(msg.getBytes());
-        client.write(buffer);
-        buffer.clear();
-    }
-
+    /**
+     * Receives a message from the server.
+     * @return received message
+     * @throws IOException if an I/O error occurs
+     */
     public static String get() throws IOException {
-        var buffer2 = ByteBuffer.allocate(256);
-        client.read(buffer2);
-        var s = new String(buffer2.array()).trim();
-        buffer2.clear();
-        return s;
+        var buffer = ByteBuffer.allocate(256);
+        client.read(buffer);
+        return new String(buffer.array()).trim();
     }
 
     public static void main(String[] args) throws InterruptedException, IOException {
-        start();
+        var port = Integer.parseInt(args[0]);
+        start(port);
 
         // GET ID
         String idString = get();
@@ -148,6 +146,19 @@ public class Client {
                 System.out.println("Player " + betMaker + " " + betType);
             }
         }
+
+        // GET WINNER
+        String winnerString = get();
+        int winner = Integer.parseInt(winnerString.split(" ")[1]);
+        System.out.println("Winner: " + winner);
+
+        // GET MONEY
+        String moneyString = get();
+        int money = Integer.parseInt(moneyString.split(" ")[1]);
+        System.out.println("Money: " + money);
+
+        // GET END
+        String endString = get();
 
     }
 

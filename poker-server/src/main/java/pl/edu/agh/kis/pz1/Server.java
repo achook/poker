@@ -1,22 +1,28 @@
 package pl.edu.agh.kis.pz1;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.net.*;
+import java.nio.*;
+import java.nio.channels.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import java.io.IOException;
+
+
+/**
+ * Represents the server of the poker game.
+ */
 public class Server {
     private static ServerSocketChannel serverSocketChannel;
     private static ServerSocket serverSocket;
     private static SelectionKey selectionKey;
     private static Selector selector;
 
+    /**
+     * Starts the server.
+     * @param port server port
+     * @throws IOException if an I/O error occurs
+     */
     public static void startServer(int port) throws InternalServerException, IOException {
         var address = new InetSocketAddress(port);
 
@@ -31,6 +37,10 @@ public class Server {
         selectionKey = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
     }
 
+    /**
+     * Stops the server.
+     * @throws InternalServerException if an error occurs
+     */
     public static void stopServer() throws InternalServerException {
         try {
             serverSocket.close();
@@ -39,29 +49,12 @@ public class Server {
         }
     }
 
-    private static String readAndAnswer(String message, SelectionKey key)
-            throws IOException, InterruptedException {
-
-        var buffer = ByteBuffer.allocate(256);
-        SocketChannel client = (SocketChannel) key.channel();
-        buffer.clear();
-
-        while ((client.read(buffer)) > 0) {}
-        buffer.flip();
-
-        var s = new String(buffer.array()).trim();
-
-        buffer.clear();
-        buffer.put(message.getBytes());
-        buffer.flip();
-
-        while (buffer.hasRemaining()) {
-            client.write (buffer);
-        }
-
-        return s;
-    }
-
+    /**
+     * Sends a message to the client.
+     * @param message message to send
+     * @param key client key
+     * @throws IOException if an I/O error occurs
+     */
     private static void send(String message, SelectionKey key) throws IOException {
         var buffer = ByteBuffer.allocate(256);
         SocketChannel client = (SocketChannel) key.channel();
@@ -75,41 +68,49 @@ public class Server {
         }
     }
 
+    /**
+     * Receives a message from the client.
+     * @param key client key
+     * @return received message
+     * @throws IOException if an I/O error occurs
+     */
     private static String read(SelectionKey key) throws IOException {
         var buffer = ByteBuffer.allocate(256);
         SocketChannel client = (SocketChannel) key.channel();
-        buffer.clear();
 
         int numRead;
-
         while ((numRead = client.read(buffer)) > 0) {}
+
         if (numRead == -1) {
-            // Client disconnected
+            // TODO: Handle user disconnect
         }
 
         return new String(buffer.array()).trim();
     }
 
-    private static void register(Selector selector, ServerSocketChannel serverSocket)
-            throws IOException {
-
+    /**
+     * Registers a socket channel with the selector.
+     * @param selector selector
+     * @param serverSocket server socket
+     * @throws IOException if an I/O error occurs
+     */
+    private static void register(Selector selector, ServerSocketChannel serverSocket) throws IOException {
         SocketChannel client = serverSocket.accept();
         client.configureBlocking(false);
-
         client.register(selector, client.validOps());
     }
 
     public static void main(String[] args) throws InternalServerException, IOException, InterruptedException {
+        var port = Integer.parseInt(args[0]);
+        var numberOfAllPlayers = Integer.parseInt(args[1]);
 
-        startServer(8090);
-
-        var maxPlayers = 2;
+        startServer(port);
 
         // WAIT FOR PLAYERS
         var currentID = 0;
         Map<Integer, SelectionKey> players = new java.util.HashMap<>(Map.of());
 
-        while (currentID < maxPlayers) {
+        while (currentID < numberOfAllPlayers) {
             selector.select();
 
             Set<SelectionKey> selectedKeys = selector.selectedKeys();
@@ -145,7 +146,7 @@ public class Server {
         var startingMoney = 1000;
         var ante = 10;
 
-        var game = new Game(maxPlayers, ante);
+        var game = new Game(numberOfAllPlayers, ante);
 
         // SEND ANTE
         for (var player : players.entrySet()) {
@@ -173,61 +174,59 @@ public class Server {
         for (var player : players.entrySet()) {
             send("DEALER " + game.getDealerID(), player.getValue());
         }
-
         TimeUnit.MILLISECONDS.sleep(100);
 
 
         while (!game.isRoundFinished()) {
             // Check which players turn is it
-            var curentPlayerID = game.getCurrentPlayerID();
+            var currentPlayerID = game.getCurrentPlayerID();
 
             // Inform all the players
             for (var player : players.entrySet()) {
-                send("TURN " + curentPlayerID, player.getValue());
+                send("TURN " + currentPlayerID, player.getValue());
             }
 
             // Wait for the current player to make a move
             String bet = "";
             while (!bet.contains("BET")) {
-                bet = read(players.get(curentPlayerID));
+                bet = read(players.get(currentPlayerID));
             }
-
-            System.out.println(bet);
 
             var rawBetElements = bet.split(" ");
             var betType = rawBetElements[1];
 
+            Game.Move move = null;
+            int amount = -1;
 
-            if (betType.contains("FOLD")) {
-                System.out.println("Fold " + curentPlayerID);
-                game.fold(curentPlayerID);
+            while (move == null) {
+                if (betType.contains("FOLD")) {
+                    move = Game.Move.FOLD;
 
-            } else if (betType.contains("CALL")) {
-                System.out.println("Call " + curentPlayerID);
-                game.call(curentPlayerID);
+                } else if (betType.contains("CALL")) {
+                    move = Game.Move.CALL;
 
-            } else if (betType.contains("RAISE")) {
-                var amount = Integer.parseInt(rawBetElements[2]);
-                System.out.println("Raise " + amount + " " + curentPlayerID);
-                game.raise(curentPlayerID, amount);
+                } else if (betType.contains("RAISE")) {
+                    move = Game.Move.RAISE;
+                    amount = Integer.parseInt(rawBetElements[2]);
 
-            } else if (betType.contains("CHECK")) {
-                System.out.println("Check " + curentPlayerID);
-                game.check(curentPlayerID);
+                } else if (betType.contains("CHECK")) {
+                    move = Game.Move.CHECK;
+                }
 
-            } else {
-                // Handle error
+                if (!game.isMoveLegal(currentPlayerID, move) | move == null) {
+                    send("ILLEGAL", players.get(currentPlayerID));
+                }
             }
+
+            game.makeMove(currentPlayerID, move, amount);
 
             // Send bet to other players
             for (var player : players.entrySet()) {
-                if (player.getKey() != curentPlayerID) {
-                    send("BET " + curentPlayerID + " " + betType, player.getValue());
+                if (player.getKey() != currentPlayerID) {
+                    send("BET " + currentPlayerID + " " + betType, player.getValue());
                 }
             }
         }
-
-        System.out.println("WE FINISHED");
 
         // INFORM THAT ROUND IS FINISHED
         for (var player : players.entrySet()) {
@@ -239,7 +238,7 @@ public class Server {
         // REPLACE CARDS
         var replacedForPlayers = 0;
 
-        while (replacedForPlayers < maxPlayers) {
+        while (replacedForPlayers < numberOfAllPlayers) {
             for (var player : players.entrySet()) {
                 var cardsToReplace = read(player.getValue());
                 var indexes = new ArrayList<Integer>();
@@ -267,50 +266,51 @@ public class Server {
         // SECOND ROUND
         while (!game.isRoundFinished()) {
             // Check which players turn is it
-            var curentPlayerID = game.getCurrentPlayerID();
+            var currentPlayerID = game.getCurrentPlayerID();
 
             // Inform all the players
             for (var player : players.entrySet()) {
-                send("TURN " + curentPlayerID, player.getValue());
+                send("TURN " + currentPlayerID, player.getValue());
             }
 
             // Wait for the current player to make a move
             String bet = "";
             while (!bet.contains("BET")) {
-                bet = read(players.get(curentPlayerID));
+                bet = read(players.get(currentPlayerID));
             }
-
-            System.out.println(bet);
 
             var rawBetElements = bet.split(" ");
             var betType = rawBetElements[1];
 
+            Game.Move move = null;
+            int amount = -1;
 
-            if (betType.contains("FOLD")) {
-                System.out.println("Fold " + curentPlayerID);
-                game.fold(curentPlayerID);
+            while (move == null) {
+                if (betType.contains("FOLD")) {
+                    move = Game.Move.FOLD;
 
-            } else if (betType.contains("CALL")) {
-                System.out.println("Call " + curentPlayerID);
-                game.call(curentPlayerID);
+                } else if (betType.contains("CALL")) {
+                    move = Game.Move.CALL;
 
-            } else if (betType.contains("RAISE")) {
-                var amount = Integer.parseInt(rawBetElements[2]);
-                System.out.println("Raise " + amount + " " + curentPlayerID);
-                game.raise(curentPlayerID, amount);
+                } else if (betType.contains("RAISE")) {
+                    move = Game.Move.RAISE;
+                    amount = Integer.parseInt(rawBetElements[2]);
 
-            } else if (betType.contains("CHECK")) {
-                System.out.println("Check " + curentPlayerID);
-                game.check(curentPlayerID);
+                } else if (betType.contains("CHECK")) {
+                    move = Game.Move.CHECK;
+                }
 
-            } else {
-                // Handle error
+                if (!game.isMoveLegal(currentPlayerID, move) | move == null) {
+                    send("ILLEGAL", players.get(currentPlayerID));
+                }
             }
+
+            game.makeMove(currentPlayerID, move, amount);
 
             // Send bet to other players
             for (var player : players.entrySet()) {
-                if (player.getKey() != curentPlayerID) {
-                    send("BET " + curentPlayerID + " " + betType, player.getValue());
+                if (player.getKey() != currentPlayerID) {
+                    send("BET " + currentPlayerID + " " + betType, player.getValue());
                 }
             }
         }
@@ -319,20 +319,23 @@ public class Server {
         for (var player : players.entrySet()) {
             send("FINISHED 2", player.getValue());
         }
+        TimeUnit.MILLISECONDS.sleep(100);
 
         var winner = game.endSecondRound();
 
-        System.out.println("WINNER IS " + winner);
+        System.out.println("The winner is " + winner);
 
         // SEND WINNER
         for (var player : players.entrySet()) {
             send("WINNER " + winner, player.getValue());
         }
+        TimeUnit.MILLISECONDS.sleep(100);
 
         // SEND BALANCES
         for (var player : players.entrySet()) {
             send("BALANCE " + game.getBalance(player.getKey()), player.getValue());
         }
+        TimeUnit.MILLISECONDS.sleep(100);
 
         // INFORM THAT GAME IS FINISHED
         for (var player : players.entrySet()) {

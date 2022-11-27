@@ -41,9 +41,14 @@ public class Card implements Comparable<Card> {
         rank = r;
     }
 
+    /**
+     * Returns a card from a valid SCP string.
+     * @param scp SCP encoded card
+     * @return card
+     */
     static Card fromSCP(String scp) {
-        var s = scp.charAt(1);
         var r = scp.charAt(0);
+        var s = scp.charAt(1);
 
         CardSuite suite;
         CardRank rank;
@@ -81,6 +86,14 @@ public class Card implements Comparable<Card> {
         return rank.compareTo(c.rank);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Card card = (Card) o;
+        return suite == card.suite && rank == card.rank;
+    }
+
     /**
      * Returns a suite of a card.
      * @return A suite of a card.
@@ -110,30 +123,38 @@ public class Card implements Comparable<Card> {
         return getName();
     }
 
+    /**
+     * Returns an SCP representation of a card.
+     * @return An SCP representation of a card.
+     */
     public String toSCP() {
-        Map<CardRank, String> rankMap = Map.ofEntries(
-                Map.entry(CardRank.TWO, "2"),
-                Map.entry(CardRank.THREE, "3"),
-                Map.entry(CardRank.FOUR, "4"),
-                Map.entry(CardRank.FIVE, "5"),
-                Map.entry(CardRank.SIX, "6"),
-                Map.entry(CardRank.SEVEN, "7"),
-                Map.entry(CardRank.EIGHT, "8"),
-                Map.entry(CardRank.NINE, "9"),
-                Map.entry(CardRank.TEN, "T"),
-                Map.entry(CardRank.JACK, "J"),
-                Map.entry(CardRank.QUEEN, "Q"),
-                Map.entry(CardRank.KING, "K"),
-                Map.entry(CardRank.ACE, "A")
-        );
+        String s;
 
-        Map<CardSuite, String> suiteMap = Map.ofEntries(
-                Map.entry(CardSuite.HEARTS, "H"),
-                Map.entry(CardSuite.DIAMONDS, "D"),
-                Map.entry(CardSuite.CLUBS, "C"),
-                Map.entry(CardSuite.SPADES, "S")
-        );
+        switch (rank) {
+            case TWO -> s = "2";
+            case THREE -> s = "3";
+            case FOUR -> s = "4";
+            case FIVE -> s = "5";
+            case SIX -> s = "6";
+            case SEVEN -> s = "7";
+            case EIGHT -> s = "8";
+            case NINE -> s = "9";
+            case TEN -> s = "T";
+            case JACK -> s = "J";
+            case QUEEN -> s = "Q";
+            case KING -> s = "K";
+            case ACE -> s = "A";
+            default -> throw new IllegalStateException("Unexpected value: " + rank);
+        }
 
-        return rankMap.get(rank) + suiteMap.get(suite);
+        switch (suite) {
+            case HEARTS -> s += "H";
+            case DIAMONDS -> s += "D";
+            case CLUBS -> s += "C";
+            case SPADES -> s += "S";
+            default -> throw new IllegalStateException("Unexpected value: " + suite);
+        }
+
+        return s;
     }
 }

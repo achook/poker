@@ -1,17 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AnalysisUIOptions">
+    <option name="ANALYZE_TEST_SOURCES" value="false" />
+  </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="235f8f3c-537d-4728-8ddb-1ab6db8d6c04" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/poker-client/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/poker-client/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/allclasses-index.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/allclasses-index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/allpackages-index.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/allpackages-index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/help-doc.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/help-doc.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-1.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-1.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-10.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-10.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-11.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-11.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-12.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-12.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-13.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-13.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-14.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-14.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-15.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-15.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-16.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-16.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-17.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-17.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-18.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-18.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-19.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-19.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-2.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-2.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-3.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-3.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-4.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-4.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-5.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-5.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-6.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-6.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-7.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-7.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-8.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-8.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index-files/index-9.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index-files/index-9.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/member-search-index.js" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/member-search-index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/overview-tree.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/overview-tree.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Card.CardRank.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Card.CardRank.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Card.CardSuite.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Card.CardSuite.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Card.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Card.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/CardTest.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/CardTest.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Client.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Client.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Deck.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Deck.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/DeckTest.NonExistentPlayerException.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/DeckTest.NonExistentPlayerException.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/DeckTest.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/DeckTest.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Game.Move.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Game.Move.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Game.Round.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Game.Round.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Game.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Game.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Hand.HandType.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Hand.HandType.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Hand.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Hand.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/HandTest.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/HandTest.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/IllegalMoveException.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/IllegalMoveException.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/InternalServerException.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/InternalServerException.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Main.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Main.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/NonExistentPlayerException.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/NonExistentPlayerException.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Player.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Player.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Server.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/Server.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/package-summary.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/package-summary.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/package-tree.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/pl/edu/agh/kis/pz1/package-tree.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/serialized-form.html" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/serialized-form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javadoc/type-search-index.js" beforeDir="false" afterPath="$PROJECT_DIR$/javadoc/type-search-index.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/poker-client/src/main/java/pl/edu/agh/kis/pz1/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/poker-client/src/main/java/pl/edu/agh/kis/pz1/Client.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/poker-model/src/main/java/pl/edu/agh/kis/pz1/Card.java" beforeDir="false" afterPath="$PROJECT_DIR$/poker-model/src/main/java/pl/edu/agh/kis/pz1/Card.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/poker-model/src/main/java/pl/edu/agh/kis/pz1/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/poker-model/src/main/java/pl/edu/agh/kis/pz1/Game.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/poker-model/src/main/java/pl/edu/agh/kis/pz1/Hand.java" beforeDir="false" afterPath="$PROJECT_DIR$/poker-model/src/main/java/pl/edu/agh/kis/pz1/Hand.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/poker-model/src/main/java/pl/edu/agh/kis/pz1/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/poker-model/src/main/java/pl/edu/agh/kis/pz1/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poker-model/src/test/java/pl/edu/agh/kis/pz1/CardTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/poker-model/src/test/java/pl/edu/agh/kis/pz1/CardTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poker-model/src/test/java/pl/edu/agh/kis/pz1/DeckTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/poker-model/src/test/java/pl/edu/agh/kis/pz1/DeckTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/poker-server/src/main/java/pl/edu/agh/kis/pz1/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/poker-server/src/main/java/pl/edu/agh/kis/pz1/Server.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -22,8 +74,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="JUnit5 Test Class" />
         <option value="Class" />
+        <option value="JUnit5 Test Class" />
       </list>
     </option>
   </component>
@@ -91,12 +143,13 @@
       <recent name="pl.edu.agh.kis.pz1" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Run client">
+  <component name="RunManager" selected="JUnit.Test all">
     <configuration name="Run client" type="Application" factoryName="Application" singleton="false">
       <option name="ALTERNATIVE_JRE_PATH" value="openjdk-17" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="pl.edu.agh.kis.pz1.Client" />
       <module name="poker-client" />
+      <option name="PROGRAM_PARAMETERS" value="8090" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -106,6 +159,7 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="pl.edu.agh.kis.pz1.Server" />
       <module name="poker-server" />
+      <option name="PROGRAM_PARAMETERS" value="8090 2" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -157,7 +211,7 @@
       <workItem from="1669161605887" duration="467000" />
       <workItem from="1669402161112" duration="71000" />
       <workItem from="1669402276987" duration="26372000" />
-      <workItem from="1669494797481" duration="21171000" />
+      <workItem from="1669494797481" duration="27661000" />
     </task>
     <servers />
   </component>
@@ -181,5 +235,6 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="../../../../Documents/Uni/pz1/poker/poker-model/target/jacoco.exec" NAME="jacoco.exec" MODIFIED="1669416099463" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="jacoco" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/poker$Test_all.ic" NAME="Test all Coverage Results" MODIFIED="1669581625170" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
   </component>
 </project>
