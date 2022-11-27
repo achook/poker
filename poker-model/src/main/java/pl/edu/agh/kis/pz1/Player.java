@@ -2,10 +2,11 @@ package pl.edu.agh.kis.pz1;
 
 public class Player {
     private String name;
-    private int money;
+    int money;
     private Hand hand;
     boolean hasFolded;
     private boolean currentBet;
+    int lastBet;
 
     private Game game;
 

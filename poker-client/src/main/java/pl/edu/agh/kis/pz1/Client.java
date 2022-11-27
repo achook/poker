@@ -1,6 +1,8 @@
 package pl.edu.agh.kis.pz1;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Serial;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -49,35 +51,104 @@ public class Client {
         start();
 
         // GET ID
-        String id = get();
-        System.out.println("ID");
-        System.out.println(id);
+        String idString = get();
+        int id = Integer.parseInt(idString.split(" ")[1]);
+
+        // GET BEGIN
+        String beginString = get();
+
+        // GET ANTE
+        String anteString = get();
+        int ante = Integer.parseInt(anteString.split(" ")[1]);
+        System.out.println("Ante: " + ante);
 
         // GET MAX
-        String start = get();
-        System.out.println("START");
-        System.out.println(start);
+        String startMoneyString = get();
+        int startMoney = Integer.parseInt(startMoneyString.split(" ")[1]);
+        System.out.println("Start money: " + startMoney);
+
+        var h = new Hand();
 
         // GET 5 CARDS
         for (int i = 0; i < 5; i++) {
-            String card = get();
-            System.out.println("CARD");
-            System.out.println(card);
+            String cartString = get();
+            var c = Card.fromSCP(cartString.split(" ")[1]);
+            h.addCard(c);
         }
 
-
+        System.out.println("Hand: " + h);
 
         // GET DEALER
-        String dealer = get();
-        System.out.println("DEALER");
-        System.out.println(dealer);
+        String dealerString = get();
+        int dealer = Integer.parseInt(dealerString.split(" ")[1]);
+        System.out.println("Dealer: " + dealer);
 
-        TimeUnit.SECONDS.sleep(2);
+        String incoming = "";
+        while (!incoming.contains("FINISHED 1")) {
+            incoming = get();
 
-        send("FOLD");
-        System.out.println("SENT");
+            if (incoming.contains("TURN")) {
+                var whoseTurn = Integer.parseInt(incoming.split(" ")[1]);
 
-        while (true) {}
+                if (whoseTurn == id) {
+                    System.out.println("YOUR TURN");
+
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+                    String move = reader.readLine();
+
+                    send("BET " + move);
+                }
+            }
+
+            if (incoming.contains("BET")) {
+                var betMaker = Integer.parseInt(incoming.split(" ")[1]);
+                var betType = incoming.split(" ")[2];
+
+                System.out.println("Player " + betMaker + " " + betType);
+            }
+        }
+
+        // REPLACE CARDS
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        String toReplace = reader.readLine();
+
+        send("REPLACE " + toReplace);
+
+        h = new Hand();
+
+        // GET 5 CARDS
+        for (int i = 0; i < 5; i++) {
+            String cartString = get();
+            var c = Card.fromSCP(cartString.split(" ")[1]);
+            h.addCard(c);
+        }
+
+        System.out.println("Hand: " + h);
+
+        while (!incoming.contains("FINISHED 2")) {
+            incoming = get();
+
+            if (incoming.contains("TURN")) {
+                var whoseTurn = Integer.parseInt(incoming.split(" ")[1]);
+
+                if (whoseTurn == id) {
+                    System.out.println("YOUR TURN");
+
+                    reader = new BufferedReader(new InputStreamReader(System.in));
+                    String move = reader.readLine();
+
+                    send("BET " + move);
+                }
+            }
+
+            if (incoming.contains("BET")) {
+                var betMaker = Integer.parseInt(incoming.split(" ")[1]);
+                var betType = incoming.split(" ")[2];
+
+                System.out.println("Player " + betMaker + " " + betType);
+            }
+        }
+
     }
 
 }

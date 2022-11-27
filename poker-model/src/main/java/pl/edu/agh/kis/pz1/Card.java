@@ -42,8 +42,8 @@ public class Card implements Comparable<Card> {
     }
 
     static Card fromSCP(String scp) {
-        var s = scp.charAt(0);
-        var r = scp.charAt(1);
+        var s = scp.charAt(1);
+        var r = scp.charAt(0);
 
         CardSuite suite;
         CardRank rank;
@@ -103,6 +103,11 @@ public class Card implements Comparable<Card> {
      */
     public String getName() {
         return getRank().name() + " OF " + getSuite().name();
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 
     public String toSCP() {

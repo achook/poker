@@ -84,25 +84,8 @@ public class Server {
 
         while ((numRead = client.read(buffer)) > 0) {}
         if (numRead == -1) {
-            System.out.println("Client disconnected");
+            // Client disconnected
         }
-
-        return new String(buffer.array()).trim();
-    }
-
-    private static String forceRead(SelectionKey key) throws IOException {
-        var buffer = ByteBuffer.allocate(256);
-        SocketChannel client = (SocketChannel) key.channel();
-        buffer.clear();
-
-        System.out.println("Waiting for message...");
-
-        while (client.read(buffer) == 0) {
-        }
-
-        System.out.println("Read: " + new String(buffer.array()).trim());
-
-        while (client.read(buffer) > 0) {}
 
         return new String(buffer.array()).trim();
     }
@@ -148,6 +131,12 @@ public class Server {
                 }
             }
         }
+        TimeUnit.MILLISECONDS.sleep(100);
+
+        for (var player : players.entrySet()) {
+            send("BEGIN", player.getValue());
+        }
+        TimeUnit.MILLISECONDS.sleep(100);
 
 
         System.out.println(players);
@@ -158,11 +147,16 @@ public class Server {
 
         var game = new Game(maxPlayers, ante);
 
+        // SEND ANTE
+        for (var player : players.entrySet()) {
+            send("ANTE " + ante, player.getValue());
+        }
+        TimeUnit.MILLISECONDS.sleep(100);
+
         // SEND STARTING MONEY
         for (var player : players.entrySet()) {
-            send("START " + startingMoney, player.getValue());
+            send("MONEY " + startingMoney, player.getValue());
         }
-
         TimeUnit.MILLISECONDS.sleep(100);
 
         // SEND CARDS
@@ -175,8 +169,6 @@ public class Server {
             }
         }
 
-
-
         // SEND DEALER ID
         for (var player : players.entrySet()) {
             send("DEALER " + game.getDealerID(), player.getValue());
@@ -184,100 +176,168 @@ public class Server {
 
         TimeUnit.MILLISECONDS.sleep(100);
 
-        // GET BETS
-        var bets = new java.util.HashMap<Integer, String>(Map.of());
 
-        while (game.getPlayersInGame().size() > 1) {
-            while (bets.size() < game.getPlayersInGame().size()) {
-                for (var player : players.entrySet()) {
-                    if (player.getValue().isWritable()) {
-                        var bet = read(player.getValue());
-                        if (!bet.equals("")) {
-                            bets.put(player.getKey(), bet);
-                        }
-                    }
-                }
+        while (!game.isRoundFinished()) {
+            // Check which players turn is it
+            var curentPlayerID = game.getCurrentPlayerID();
+
+            // Inform all the players
+            for (var player : players.entrySet()) {
+                send("TURN " + curentPlayerID, player.getValue());
             }
 
-            System.out.println(bets);
-
-            for (var bet : bets.entrySet()) {
-                if (bet.getValue().contains("FOLD")) {
-                    game.fold(bet.getKey());
-                    continue;
-                }
-
-                if (bet.getValue().contains("CALL")) {
-                    game.call(bet.getKey());
-                }
-
-                if (bet.getValue().contains("CHECK")) {
-                    game.check(bet.getKey());
-                }
-
-                if (bet.getValue().contains("RAISE")) {
-                    var amount = Integer.parseInt(bet.getValue().split(" ")[1]);
-                    game.raise(bet.getKey(), amount);
-                }
+            // Wait for the current player to make a move
+            String bet = "";
+            while (!bet.contains("BET")) {
+                bet = read(players.get(curentPlayerID));
             }
 
-            System.out.println(game.getPlayersInGame().size());
+            System.out.println(bet);
 
+            var rawBetElements = bet.split(" ");
+            var betType = rawBetElements[1];
+
+
+            if (betType.contains("FOLD")) {
+                System.out.println("Fold " + curentPlayerID);
+                game.fold(curentPlayerID);
+
+            } else if (betType.contains("CALL")) {
+                System.out.println("Call " + curentPlayerID);
+                game.call(curentPlayerID);
+
+            } else if (betType.contains("RAISE")) {
+                var amount = Integer.parseInt(rawBetElements[2]);
+                System.out.println("Raise " + amount + " " + curentPlayerID);
+                game.raise(curentPlayerID, amount);
+
+            } else if (betType.contains("CHECK")) {
+                System.out.println("Check " + curentPlayerID);
+                game.check(curentPlayerID);
+
+            } else {
+                // Handle error
+            }
+
+            // Send bet to other players
+            for (var player : players.entrySet()) {
+                if (player.getKey() != curentPlayerID) {
+                    send("BET " + curentPlayerID + " " + betType, player.getValue());
+                }
+            }
+        }
+
+        System.out.println("WE FINISHED");
+
+        // INFORM THAT ROUND IS FINISHED
+        for (var player : players.entrySet()) {
+            send("FINISHED 1", player.getValue());
         }
 
         game.endFirstRound();
 
         // REPLACE CARDS
-        for (var player : players.entrySet()) {
-            var cardsToReplace = read(player.getValue());
-            var indexes = new ArrayList<Integer>();
+        var replacedForPlayers = 0;
 
-            for (var cardIndex: cardsToReplace.split(" ")) {
-                indexes.add(Integer.parseInt(cardIndex));
-            }
+        while (replacedForPlayers < maxPlayers) {
+            for (var player : players.entrySet()) {
+                var cardsToReplace = read(player.getValue());
+                var indexes = new ArrayList<Integer>();
 
-            game.replaceCards(player.getKey(), indexes);
-
-            for (var card : game.getHand(player.getKey()).getCards()) {
-                send("CARD " + card.toSCP() + "\n", player.getValue());
-            }
-        }
-
-        // GET BETS
-        while (game.getPlayersInGame().size() > 1) {
-            for (var player: players.entrySet()) {
-                if (!game.getPlayersInGame().contains(player.getKey())) {
+                var rawIndexes = cardsToReplace.split(" ");
+                if (!rawIndexes[0].contains("REPLACE")) {
                     continue;
                 }
 
-                var bet = read(player.getValue());
+                replacedForPlayers++;
 
-                if (bet.contains("FOLD")) {
-                    game.fold(player.getKey());
+                for (var i = 1; i < rawIndexes.length; i++) {
+                    indexes.add(Integer.parseInt(rawIndexes[i]));
                 }
 
-                if (bet.contains("CALL")) {
-                    game.call(player.getKey());
-                }
+                game.replaceCards(player.getKey(), indexes);
 
-                if (bet.contains("CHECK")) {
-                    game.check(player.getKey());
-                }
-
-                if (bet.contains("RAISE")) {
-                    var amount = Integer.parseInt(bet.split(" ")[1]);
-                    game.raise(player.getKey(), amount);
+                for (var card : game.getHand(player.getKey()).getCards()) {
+                    send("CARD " + card.toSCP() + "\n", player.getValue());
+                    TimeUnit.MILLISECONDS.sleep(50);
                 }
             }
         }
 
+        // SECOND ROUND
+        while (!game.isRoundFinished()) {
+            // Check which players turn is it
+            var curentPlayerID = game.getCurrentPlayerID();
+
+            // Inform all the players
+            for (var player : players.entrySet()) {
+                send("TURN " + curentPlayerID, player.getValue());
+            }
+
+            // Wait for the current player to make a move
+            String bet = "";
+            while (!bet.contains("BET")) {
+                bet = read(players.get(curentPlayerID));
+            }
+
+            System.out.println(bet);
+
+            var rawBetElements = bet.split(" ");
+            var betType = rawBetElements[1];
+
+
+            if (betType.contains("FOLD")) {
+                System.out.println("Fold " + curentPlayerID);
+                game.fold(curentPlayerID);
+
+            } else if (betType.contains("CALL")) {
+                System.out.println("Call " + curentPlayerID);
+                game.call(curentPlayerID);
+
+            } else if (betType.contains("RAISE")) {
+                var amount = Integer.parseInt(rawBetElements[2]);
+                System.out.println("Raise " + amount + " " + curentPlayerID);
+                game.raise(curentPlayerID, amount);
+
+            } else if (betType.contains("CHECK")) {
+                System.out.println("Check " + curentPlayerID);
+                game.check(curentPlayerID);
+
+            } else {
+                // Handle error
+            }
+
+            // Send bet to other players
+            for (var player : players.entrySet()) {
+                if (player.getKey() != curentPlayerID) {
+                    send("BET " + curentPlayerID + " " + betType, player.getValue());
+                }
+            }
+        }
+
+
+        for (var player : players.entrySet()) {
+            send("FINISHED 2", player.getValue());
+        }
+
         var winner = game.endSecondRound();
+
+        System.out.println("WINNER IS " + winner);
 
         // SEND WINNER
         for (var player : players.entrySet()) {
             send("WINNER " + winner, player.getValue());
         }
 
+        // SEND BALANCES
+        for (var player : players.entrySet()) {
+            send("BALANCE " + game.getBalance(player.getKey()), player.getValue());
+        }
+
+        // INFORM THAT GAME IS FINISHED
+        for (var player : players.entrySet()) {
+            send("END", player.getValue());
+        }
 
     }
 }

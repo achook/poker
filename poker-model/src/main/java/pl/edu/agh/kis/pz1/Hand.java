@@ -417,4 +417,8 @@ public class Hand implements Comparable<Hand> {
         return lowerRank;
     }
 
+    @Override
+    public String toString() {
+        return cards.toString();
+    }
 }
