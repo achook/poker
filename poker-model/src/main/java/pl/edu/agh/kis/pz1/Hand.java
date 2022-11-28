@@ -86,9 +86,6 @@ public class Hand implements Comparable<Hand> {
             return diff;
         }
 
-        var c1 = this.getCards();
-        var c2 = h.getCards();
-
         // TWO HIGH CARDS
         if (t1 == HandType.HIGH_CARD) {
             return compareHighCard(h);
@@ -292,7 +289,7 @@ public class Hand implements Comparable<Hand> {
     /**
      * Analyzes the cards in this hand and sets the type and significant ranks.
      */
-    private void analyzeCards() {
+    void analyzeCards() {
         var isStraight = checkIfStraight();
         var isFlush = checkIfFlush();
         higherRank = null;
@@ -403,18 +400,6 @@ public class Hand implements Comparable<Hand> {
 
         // Default value
         type = HandType.HIGH_CARD;
-    }
-
-    public Card.CardRank getHigherRank() {
-        return higherRank;
-    }
-
-    public HandType getHandType() {
-        return type;
-    }
-
-    public Card.CardRank getLowerRank() {
-        return lowerRank;
     }
 
     @Override

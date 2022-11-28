@@ -13,9 +13,9 @@ import java.io.IOException;
  * Represents the server of the poker game.
  */
 public class Server {
-    private static ServerSocketChannel serverSocketChannel;
-    private static ServerSocket serverSocket;
-    private static SelectionKey selectionKey;
+
+    static ServerSocketChannel serverSocketChannel;
+    static ServerSocket serverSocket;
     private static Selector selector;
 
     /**
@@ -34,7 +34,7 @@ public class Server {
 
         selector = Selector.open();
 
-        selectionKey = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
     }
 
     /**
@@ -68,15 +68,29 @@ public class Server {
         }
     }
 
+    static Game.Move checkBetType(String betType) {
+        if (betType.contains("CHECK")) {
+            return Game.Move.CHECK;
+        } else if (betType.contains("CALL")) {
+            return Game.Move.CALL;
+        } else if (betType.contains("RAISE")) {
+            return Game.Move.RAISE;
+        } else if (betType.contains("FOLD")) {
+            return Game.Move.FOLD;
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Sends a message to all clients.
      * @param message message to send
      * @param keys clients keys
      * @throws IOException if an I/O error occurs
      */
-    private static void sendToAll(String message, Collection<SelectionKey> keys) throws IOException {
-        for (SelectionKey key : keys) {
-            send(message, key);
+    private static void sendToAll(String message, Collection<Player> keys) throws IOException {
+        for (Player key : keys) {
+            send(message, key.getSelectionKey());
         }
     }
 
@@ -118,20 +132,18 @@ public class Server {
      * @param game game
      * @throws IOException if an I/O error occurs
      */
-    private static void playARound(Map<Integer, SelectionKey> players, Game game) throws IOException {
+    private static void playARound(Map<Integer, Player> players, Game game) throws IOException, InterruptedException {
         while (!game.isRoundFinished()) {
             // Check which players turn is it
             var currentPlayerID = game.getCurrentPlayerID();
 
             // Inform all the players
-            for (var player : players.entrySet()) {
-                send("TURN " + currentPlayerID, player.getValue());
-            }
+            sendToAll("TURN " + currentPlayerID, players.values());
 
             // Wait for the current player to make a move
             String bet = "";
             while (!bet.contains("BET")) {
-                bet = read(players.get(currentPlayerID));
+                bet = read(players.get(currentPlayerID).getSelectionKey());
             }
 
             var rawBetElements = bet.split(" ");
@@ -141,22 +153,13 @@ public class Server {
             int amount = -1;
 
             while (move == null) {
-                if (betType.contains("FOLD")) {
-                    move = Game.Move.FOLD;
-
-                } else if (betType.contains("CALL")) {
-                    move = Game.Move.CALL;
-
-                } else if (betType.contains("RAISE")) {
-                    move = Game.Move.RAISE;
+                move = checkBetType(betType);
+                if (move == Game.Move.RAISE) {
                     amount = Integer.parseInt(rawBetElements[2]);
-
-                } else if (betType.contains("CHECK")) {
-                    move = Game.Move.CHECK;
                 }
 
-                if (!game.isMoveLegal(currentPlayerID, move) | move == null) {
-                    send("ILLEGAL", players.get(currentPlayerID));
+                if (!game.isMoveLegal(currentPlayerID, move) || move == null) {
+                    send("ILLEGAL", players.get(currentPlayerID).getSelectionKey());
                 }
             }
 
@@ -165,7 +168,13 @@ public class Server {
             // Send bet to other players
             for (var player : players.entrySet()) {
                 if (player.getKey() != currentPlayerID) {
-                    send("BET " + currentPlayerID + " " + betType, player.getValue());
+                    if (betType.contains("RAISE")) {
+                        send("BET " + currentPlayerID + " " + betType + " " + amount, player.getValue().getSelectionKey());
+                    } else {
+                        send("BET " + currentPlayerID + " " + betType, player.getValue().getSelectionKey());
+                    }
+
+                    TimeUnit.MILLISECONDS.sleep(100);
                 }
             }
         }
@@ -175,78 +184,58 @@ public class Server {
         var port = Integer.parseInt(args[0]);
         var numberOfAllPlayers = Integer.parseInt(args[1]);
 
+        playGame(port, numberOfAllPlayers);
+
+    }
+
+    static void playGame(int port, int numberOfAllPlayers)
+            throws InternalServerException, IOException, InterruptedException {
         startServer(port);
+
+        var ante = 10;
+        var game = new Game(ante);
 
         // WAIT FOR PLAYERS
         var currentID = 0;
-        Map<Integer, SelectionKey> players = new java.util.HashMap<>(Map.of());
+        Map<Integer, Player> players = new HashMap<>(Map.of());
 
-        while (currentID < numberOfAllPlayers) {
-            selector.select();
+        getPlayers(numberOfAllPlayers, game, currentID, players);
+        TimeUnit.MILLISECONDS.sleep(100);
 
-            Set<SelectionKey> selectedKeys = selector.selectedKeys();
-            Iterator<SelectionKey> iter = selectedKeys.iterator();
 
-            while (iter.hasNext()) {
-                SelectionKey key = iter.next();
-                iter.remove();
+        System.out.println(players);
+        // GAME STARTS
 
-                if (key.isAcceptable()) {
-                    register(selector, serverSocketChannel);
-                }
+        var startingMoney = 1000;
 
-                if (key.isWritable() && !players.containsValue(key)) {
-                    send("ID " + currentID, key);
-                    players.put(currentID, key);
-                    currentID++;
+        // SEND ANTE
+        for (var player : players.entrySet()) {
+            send("ANTE " + ante, player.getValue().getSelectionKey());
+        }
+        TimeUnit.MILLISECONDS.sleep(100);
 
-                }
-            }
+        // SEND STARTING MONEY
+        for (var player : players.entrySet()) {
+            send("MONEY " + startingMoney, player.getValue().getSelectionKey());
         }
         TimeUnit.MILLISECONDS.sleep(100);
 
         var gameInProgress = true;
         while (gameInProgress) {
 
-            for (var player : players.entrySet()) {
-                send("BEGIN", player.getValue());
-            }
-            TimeUnit.MILLISECONDS.sleep(100);
-
-
-            System.out.println(players);
-            // GAME STARTS
-
-            var startingMoney = 1000;
-            var ante = 10;
-
-            var game = new Game(numberOfAllPlayers, ante);
-
-            // SEND ANTE
-            for (var player : players.entrySet()) {
-                send("ANTE " + ante, player.getValue());
-            }
-            TimeUnit.MILLISECONDS.sleep(100);
-
-            // SEND STARTING MONEY
-            for (var player : players.entrySet()) {
-                send("MONEY " + startingMoney, player.getValue());
-            }
-            TimeUnit.MILLISECONDS.sleep(100);
-
             // SEND CARDS
             for (var player : players.entrySet()) {
                 var cards = game.getHand(player.getKey()).getCards();
 
                 for (var card : cards) {
-                    send("CARD " + card.toSCP() + "\n", player.getValue());
+                    send("CARD " + card.toSCP() + "\n", player.getValue().getSelectionKey());
                     TimeUnit.MILLISECONDS.sleep(50);
                 }
             }
 
             // SEND DEALER ID
             for (var player : players.entrySet()) {
-                send("DEALER " + game.getDealerID(), player.getValue());
+                send("DEALER " + game.getDealerID(), player.getValue().getSelectionKey());
             }
             TimeUnit.MILLISECONDS.sleep(100);
 
@@ -260,10 +249,9 @@ public class Server {
 
             // REPLACE CARDS
             var replacedForPlayers = 0;
-
             while (replacedForPlayers < numberOfAllPlayers) {
                 for (var player : players.entrySet()) {
-                    var cardsToReplace = read(player.getValue());
+                    var cardsToReplace = read(player.getValue().getSelectionKey());
                     var indexes = new ArrayList<Integer>();
 
                     var rawIndexes = cardsToReplace.split(" ");
@@ -280,7 +268,7 @@ public class Server {
                     game.replaceCards(player.getKey(), indexes);
 
                     for (var card : game.getHand(player.getKey()).getCards()) {
-                        send("CARD " + card.toSCP() + "\n", player.getValue());
+                        send("CARD " + card.toSCP() + "\n", player.getValue().getSelectionKey());
                         TimeUnit.MILLISECONDS.sleep(50);
                     }
                 }
@@ -302,21 +290,68 @@ public class Server {
 
             // SEND BALANCES
             for (var player : players.entrySet()) {
-                send("BALANCE " + game.getBalance(player.getKey()), player.getValue());
+                send("BALANCE " + game.getBalance(player.getKey()), player.getValue().getSelectionKey());
             }
             TimeUnit.MILLISECONDS.sleep(100);
 
-            // INFORM THAT GAME IS FINISHED
-            for (var player : players.entrySet()) {
-                send("END", player.getValue());
+
+            var gotResponseFrom = 0;
+            while (gotResponseFrom < game.getPlayersInGame().size()) {
+                for (var player : players.entrySet()) {
+                    var response = read(player.getValue().getSelectionKey());
+                    if (response.contains("CONTINUE")) {
+                        gotResponseFrom++;
+                    }
+
+                    if (response.contains("QUIT")) {
+                        game.players.remove(player.getValue().getID());
+                    }
+                }
             }
 
-            if (true) {
+            if (game.getPlayersInGame().size() >= 2) {
                 game.prepareNewGame();
             } else {
                 gameInProgress = false;
             }
         }
+    }
 
+    private static void getPlayers(int numberOfAllPlayers, Game game, int currentID, Map<Integer, Player> players) throws IOException {
+        while (currentID < numberOfAllPlayers) {
+            selector.select();
+
+            Set<SelectionKey> selectedKeys = selector.selectedKeys();
+            Iterator<SelectionKey> iter = selectedKeys.iterator();
+
+            while (iter.hasNext()) {
+                SelectionKey key = iter.next();
+                iter.remove();
+
+                if (key.isAcceptable()) {
+                    register(selector, serverSocketChannel);
+                }
+
+                if (key.isWritable()) {
+                    var isAlreadyRegistered = false;
+
+                    for (var player : players.entrySet()) {
+                        if (player.getValue().getSelectionKey() == key) {
+                            isAlreadyRegistered = true;
+                            break;
+                        }
+                    }
+
+                    if (!isAlreadyRegistered) {
+                        var p = new Player(key, currentID, game);
+                        game.addPlayer(p);
+                        players.put(currentID, p);
+                        send("ID " + currentID, key);
+                        currentID++;
+                    }
+
+                }
+            }
+        }
     }
 }

@@ -94,6 +94,11 @@ public class Card implements Comparable<Card> {
         return suite == card.suite && rank == card.rank;
     }
 
+    @Override
+    public int hashCode() {
+        return Map.entry(suite, rank).hashCode();
+    }
+
     /**
      * Returns a suite of a card.
      * @return A suite of a card.

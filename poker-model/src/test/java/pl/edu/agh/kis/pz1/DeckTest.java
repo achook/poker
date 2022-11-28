@@ -23,16 +23,17 @@ class DeckTest {
         Deck deck = new Deck();
         var topCard = deck.cards.get(0);
 
-        assertEquals(deck.getFromTop(), topCard);
+        assertEquals(topCard, deck.getFromTop());
     }
 
     @Test
     void cardsLeft() {
         Deck deck = new Deck();
-        assertEquals(deck.cardsLeft(), 52);
+        assertEquals(52, deck.cardsLeft());
+
 
         deck.getFromTop();
-        assertEquals(deck.cardsLeft(), 51);
+        assertEquals(51, deck.cardsLeft());
     }
 
     @Test
@@ -56,8 +57,8 @@ class DeckTest {
         deck.cards.clear();
 
         deck.addCard(cardToAdd);
-        assertEquals(deck.cardsLeft(), 1);
-        assertEquals(deck.getFromTop(), cardToAdd);
+        assertEquals(1, deck.cardsLeft());
+        assertEquals(cardToAdd, deck.getFromTop());
     }
 
     public static class NonExistentPlayerException extends Exception {

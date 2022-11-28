@@ -6,6 +6,7 @@ import java.util.ArrayList;
  * Represents the current state of the game of poker.
  */
 public class Game {
+
     public enum Move {
         FOLD,
         CHECK,
@@ -13,12 +14,7 @@ public class Game {
         RAISE
     }
 
-    public enum Round {
-        FIRST,
-        SECOND
-    }
-
-    Player[] players;
+    ArrayList<Player> players;
     private int numberOfPlayers;
 
     private Deck deck;
@@ -28,40 +24,47 @@ public class Game {
 
 
     int pot;
-    private int currentBet;
+    int ante;
+    int currentBet;
 
     private boolean canCheck = true;
-    private int lastPlayerIndexToRaise = -1;
+    int lastPlayerIndexToRaise = -1;
 
 
-    public Game(int numberOfPlayers, int ante) {
-        this.numberOfPlayers = numberOfPlayers;
+    public Game(int ante) {
+        this.numberOfPlayers = 0;
 
-        players = new Player[numberOfPlayers];
+        players = new ArrayList<Player>();
 
         deck = new Deck();
-
-        for (int i = 0; i < numberOfPlayers; i++) {
-            players[i] = new Player();
-            players[i].setGame(this);
-            players[i].lastBet = ante;
-            players[i].money = 1000;
-
-            var h = new Hand();
-            h.addCards(deck.getFromTop(5));
-
-            players[i].setHand(h);
-        }
+        this.ante = ante;
 
         dealerIndex = 0;
         currentPlayerIndex = 1;
 
-        pot = ante * numberOfPlayers;
+    }
 
+    public void addPlayer(Player p) {
+        numberOfPlayers++;
+        p.setGame(this);
+        p.lastBet = this.ante;
+        p.money = 1000-ante;
+
+
+        var h = new Hand();
+        h.addCards(deck.getFromTop(5));
+
+        p.setHand(h);
+
+        players.add(p);
+
+        pot += ante;
+
+        currentBet = ante;
     }
 
     public Hand getHand(int player) {
-        return players[player].getHand();
+        return players.get(player).getHand();
     }
 
     public int getDealerID() {
@@ -77,12 +80,10 @@ public class Game {
      * Updates currentPlayer field.
      */
     private void nextPlayer() {
-        System.out.println("Before: " + currentPlayerIndex);
         while (true) {
             currentPlayerIndex = (currentPlayerIndex + 1) % numberOfPlayers;
 
-            if (!players[currentPlayerIndex].hasFolded) {
-                System.out.println("After: " + currentPlayerIndex);
+            if (!players.get(currentPlayerIndex).hasFolded) {
                 return;
             }
         }
@@ -93,10 +94,10 @@ public class Game {
      * @param playerID ID of the player who is calling
      */
     public void call(int playerID) {
-        players[playerID].money -= (currentBet - players[playerID].lastBet);
-        pot += (currentBet - players[playerID].lastBet);
-        players[playerID].lastBet = currentBet;
+        players.get(playerID).money -= currentBet - players.get(playerID).lastBet;
+        pot += currentBet - players.get(playerID).lastBet;
 
+        players.get(playerID).lastBet = currentBet;
         nextPlayer();
     }
 
@@ -106,10 +107,12 @@ public class Game {
      * @param amount Amount by which the bet is raised.
      */
     public void raise(int playerID, int amount) {
-        players[playerID].money -= amount;
+        players.get(playerID).money -= amount;
         pot += amount;
+
         currentBet += amount;
-        players[playerID].lastBet = amount;
+        players.get(playerID).lastBet = amount;
+
         lastPlayerIndexToRaise = playerID;
         canCheck = false;
 
@@ -121,7 +124,7 @@ public class Game {
      * @param playerID ID of the player who is folding.
      */
     public void fold(int playerID) {
-        players[playerID].hasFolded = true;
+        players.get(playerID).hasFolded = true;
 
         nextPlayer();
     }
@@ -139,6 +142,7 @@ public class Game {
             case FOLD -> fold(playerID);
             case CHECK -> check(playerID);
             case CALL -> call(playerID);
+            default -> throw new IllegalStateException("Unexpected value: " + move);
         }
     }
 
@@ -181,8 +185,8 @@ public class Game {
      */
     void replaceCards(int playerID, ArrayList<Integer> cardIndexes) {
 
-        players[playerID].getHand().removeCards(cardIndexes);
-        players[playerID].getHand().addCards(deck.getFromTop(cardIndexes.size()));
+        players.get(playerID).getHand().removeCards(cardIndexes);
+        players.get(playerID).getHand().addCards(deck.getFromTop(cardIndexes.size()));
     }
 
     /**
@@ -203,7 +207,7 @@ public class Game {
             }
         }
 
-        players[bestPlayerID].money += pot;
+        players.get(bestPlayerID).money += pot;
         return bestPlayerID;
     }
 
@@ -224,7 +228,7 @@ public class Game {
     }
 
     public int getBalance(int playerID) {
-        return players[playerID].money;
+        return players.get(playerID).money;
     }
 
     /**
@@ -246,10 +250,10 @@ public class Game {
                 return canCheck;
             }
             case CALL -> {
-                return players[playerID].money >= currentBet - players[playerID].lastBet;
+                return players.get(playerID).money >= currentBet - players.get(playerID).lastBet;
             }
             case RAISE -> {
-                return players[playerID].money >= currentBet - players[playerID].lastBet + 1;
+                return players.get(playerID).money >= currentBet - players.get(playerID).lastBet + 1;
             }
         }
 
@@ -273,5 +277,9 @@ public class Game {
 
         canCheck = true;
         lastPlayerIndexToRaise = -1;
+    }
+
+    public int getPot() {
+        return pot;
     }
 }

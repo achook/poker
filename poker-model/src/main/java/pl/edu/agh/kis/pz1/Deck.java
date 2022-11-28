@@ -43,11 +43,9 @@ public class Deck {
             for (int i = 0; i < n; i++) {
                 c[i] = cards.remove(0);
             }
-
-            return c;
         }
 
-        return null;
+        return c;
     }
 
     /**
