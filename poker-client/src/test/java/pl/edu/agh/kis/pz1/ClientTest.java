@@ -22,7 +22,7 @@ class ClientTest {
 
             Runnable r = () -> {
                 try {
-                    Server.playGame(port, 1);
+                    Server.playGame(port, 1, 50, 1000);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

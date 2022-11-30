@@ -53,7 +53,7 @@ class ServerTest {
 
             Runnable r = () -> {
                 try {
-                    Server.playGame(port, numberOfAllPlayers);
+                    Server.playGame(port, numberOfAllPlayers, 1000, 100);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

@@ -132,7 +132,7 @@ public class Server {
      * @param game game
      * @throws IOException if an I/O error occurs
      */
-    private static void playARound(Map<Integer, Player> players, Game game) throws IOException, InterruptedException {
+    private static boolean playARound(Map<Integer, Player> players, Game game) throws IOException, InterruptedException {
         while (!game.isRoundFinished()) {
             // Check which players turn is it
             var currentPlayerID = game.getCurrentPlayerID();
@@ -173,26 +173,41 @@ public class Server {
                     } else {
                         send("BET " + currentPlayerID + " " + betType, player.getValue().getSelectionKey());
                     }
-
-                    TimeUnit.MILLISECONDS.sleep(100);
                 }
             }
+
+            if (game.getPlayersInGame().size() == 1) {
+                var winner = game.getPlayersInGame().get(0);
+                game.endByFold();
+
+                for (var player : players.entrySet()) {
+                    send("FINISHED WINNER " + winner.id, player.getValue().getSelectionKey());
+                }
+
+                return false;
+            }
+
+            TimeUnit.MILLISECONDS.sleep(100);
         }
+
+        return true;
     }
 
     public static void main(String[] args) throws InternalServerException, IOException, InterruptedException {
         var port = Integer.parseInt(args[0]);
         var numberOfAllPlayers = Integer.parseInt(args[1]);
+        var startingMoney = Integer.parseInt(args[2]);
+        var ante = Integer.parseInt(args[3]);
 
-        playGame(port, numberOfAllPlayers);
+
+        playGame(port, numberOfAllPlayers, ante, startingMoney);
 
     }
 
-    static void playGame(int port, int numberOfAllPlayers)
+    static void playGame(int port, int numberOfAllPlayers, int ante, int startingMoney)
             throws InternalServerException, IOException, InterruptedException {
         startServer(port);
 
-        var ante = 10;
         var game = new Game(ante);
 
         // WAIT FOR PLAYERS
@@ -203,10 +218,7 @@ public class Server {
         TimeUnit.MILLISECONDS.sleep(100);
 
 
-        System.out.println(players);
         // GAME STARTS
-
-        var startingMoney = 1000;
 
         // SEND ANTE
         for (var player : players.entrySet()) {
@@ -240,53 +252,59 @@ public class Server {
             TimeUnit.MILLISECONDS.sleep(100);
 
 
-            playARound(players, game);
+            var playSecondRound = playARound(players, game);
 
-            // INFORM THAT ROUND IS FINISHED
-            sendToAll("FINISHED 1", players.values());
+            if (playSecondRound) {
 
-            game.endFirstRound();
+                // INFORM THAT ROUND IS FINISHED
+                sendToAll("FINISHED", players.values());
 
-            // REPLACE CARDS
-            var replacedForPlayers = 0;
-            while (replacedForPlayers < numberOfAllPlayers) {
-                for (var player : players.entrySet()) {
-                    var cardsToReplace = read(player.getValue().getSelectionKey());
-                    var indexes = new ArrayList<Integer>();
+                game.endFirstRound();
 
-                    var rawIndexes = cardsToReplace.split(" ");
-                    if (!rawIndexes[0].contains("REPLACE")) {
-                        continue;
-                    }
+                // REPLACE CARDS
+                var replacedForPlayers = 0;
+                while (replacedForPlayers < game.getPlayersInGame().size()) {
+                    for (var player : players.entrySet()) {
+                        var cardsToReplace = read(player.getValue().getSelectionKey());
+                        var indexes = new ArrayList<Integer>();
 
-                    replacedForPlayers++;
+                        var rawIndexes = cardsToReplace.split(" ");
+                        if (!rawIndexes[0].contains("REPLACE")) {
+                            continue;
+                        }
 
-                    for (var i = 1; i < rawIndexes.length; i++) {
-                        indexes.add(Integer.parseInt(rawIndexes[i]));
-                    }
+                        for (var i = 1; i < rawIndexes.length; i++) {
+                            indexes.add(Integer.parseInt(rawIndexes[i]));
+                        }
 
-                    game.replaceCards(player.getKey(), indexes);
+                        game.replaceCards(player.getKey(), indexes);
 
-                    for (var card : game.getHand(player.getKey()).getCards()) {
-                        send("CARD " + card.toSCP() + "\n", player.getValue().getSelectionKey());
-                        TimeUnit.MILLISECONDS.sleep(50);
+                        for (var card : game.getHand(player.getKey()).getCards()) {
+                            send("CARD " + card.toSCP() + "\n", player.getValue().getSelectionKey());
+                            TimeUnit.MILLISECONDS.sleep(50);
+                        }
+
+
+                        replacedForPlayers++;
                     }
                 }
+                TimeUnit.MILLISECONDS.sleep(100);
+
+                // SECOND ROUND
+                playARound(players, game);
+
+
+
+                sendToAll("FINISHED", players.values());
+                TimeUnit.MILLISECONDS.sleep(100);
+
+                var winner = game.endSecondRound();
+
+                // SEND WINNER
+                sendToAll("WINNER " + winner, players.values());
             }
-
-            // SECOND ROUND
-            playARound(players, game);
-
-
-            sendToAll("FINISHED 2", players.values());
             TimeUnit.MILLISECONDS.sleep(100);
 
-            var winner = game.endSecondRound();
-            System.out.println("The winner is " + winner);
-
-            // SEND WINNER
-            sendToAll("WINNER " + winner, players.values());
-            TimeUnit.MILLISECONDS.sleep(100);
 
             // SEND BALANCES
             for (var player : players.entrySet()) {
@@ -296,7 +314,7 @@ public class Server {
 
 
             var gotResponseFrom = 0;
-            while (gotResponseFrom < game.getPlayersInGame().size()) {
+            while (gotResponseFrom < numberOfAllPlayers) {
                 for (var player : players.entrySet()) {
                     var response = read(player.getValue().getSelectionKey());
                     if (response.contains("CONTINUE")) {
@@ -308,10 +326,9 @@ public class Server {
                     }
                 }
             }
-
-            if (game.getPlayersInGame().size() >= 2) {
                 game.prepareNewGame();
-            } else {
+
+            if (game.getPlayersInGame().size() < 2) {
                 gameInProgress = false;
             }
         }

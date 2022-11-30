@@ -189,6 +189,14 @@ public class Game {
         players.get(playerID).getHand().addCards(deck.getFromTop(cardIndexes.size()));
     }
 
+    void endByFold() {
+        for (var player : players) {
+            if (!player.hasFolded) {
+                player.money += pot;
+            }
+        }
+    }
+
     /**
      * Ends the second round of betting.
      * Prepares the game for the showdown.
@@ -217,10 +225,12 @@ public class Game {
      */
     public boolean isRoundFinished() {
         if (getPlayersInGame().size() == 1) {
+            System.out.println("this true");
             return true;
         }
 
         if (lastPlayerIndexToRaise == currentPlayerIndex) {
+            System.out.println("that true");
             return true;
         }
 

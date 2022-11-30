@@ -1,16 +1,32 @@
+PARAMETRY URUCHOMIENIA
+Serwer
+<port> <liczba_graczy> <początkowa_ilość_pieniędzy> <ante>
+
+Klient
+<port>
+
+
 PROTOKÓŁ KOMUNIKACJI
 Nazwa robocza: Simple Card Protocol
 
-BEGIN
+BEGIN - rozpoczęcie gry
 
-ID <id>
+ID <id> - przypisanie id do gracza
 
-START <money>
+START <money> - przekazanie początkowej ilości pieniędzy
 
-RAISE <money>
+RAISE <money> - podbicie stawki
 
-CALL
+CALL - dopasowanie stawki
 
-FOLD
+FOLD - opuszczenie gry
 
-CHECK
+CHECK - sprawdzenie
+
+CARD <suite><rank>  - przekazanie karty
+
+BET <player> <bet_type> <bet_amount:optional> - przekazanie akcji gracza
+
+CONTINUE - rozpoczęcie kolejnej rundy
+
+QUIT - zakończenie gry

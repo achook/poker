@@ -87,7 +87,7 @@ public class Client {
             logger.announceDealer(dealerID);
 
             String incoming = "";
-            while (!incoming.contains("FINISHED 1")) {
+            while (!incoming.contains("FINISHED")) {
                 incoming = get();
 
                 if (incoming.contains("TURN")) {
@@ -95,6 +95,7 @@ public class Client {
 
                     if (whoseTurn == clientID) {
                         logger.announceTurn();
+                        logger.askForMove();
 
                         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
                         String move = reader.readLine();
@@ -108,50 +109,60 @@ public class Client {
                 }
             }
 
-            // REPLACE CARDS
-            logger.askForCardsToDiscard();
+            if (incoming.contains("WINNER")) {
+                logger.announceWinner(Integer.parseInt(incoming.split(" ")[2]));
+            } else {
+                // REPLACE CARDS
+                logger.askForCardsToDiscard();
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            String toReplace = reader.readLine();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+                String toReplace = reader.readLine();
 
-            send("REPLACE " + toReplace);
+                send("REPLACE " + toReplace);
 
-            h = new Hand();
+                h = new Hand();
 
-            // GET 5 CARDS
-            for (int i = 0; i < 5; i++) {
-                String cartString = get();
-                var c = Card.fromSCP(cartString.split(" ")[1]);
-                h.addCard(c);
-            }
+                // GET 5 CARDS
+                for (int i = 0; i < 5; i++) {
+                    String cartString = get();
+                    var c = Card.fromSCP(cartString.split(" ")[1]);
+                    h.addCard(c);
+                }
 
-            logger.announceTurn();
+                logger.displayHand(h);
+                incoming = "";
 
-            while (!incoming.contains("FINISHED 2")) {
-                incoming = get();
+                while (!incoming.contains("FINISHED")) {
+                    incoming = get();
 
-                if (incoming.contains("TURN")) {
-                    var whoseTurn = Utilities.getArgument(incoming);
+                    if (incoming.contains("TURN")) {
+                        var whoseTurn = Utilities.getArgument(incoming);
 
-                    if (whoseTurn == clientID) {
-                        logger.announceTurn();
+                        if (whoseTurn == clientID) {
+                            logger.announceTurn();
+                            logger.askForMove();
 
-                        reader = new BufferedReader(new InputStreamReader(System.in));
-                        String move = reader.readLine();
+                            reader = new BufferedReader(new InputStreamReader(System.in));
+                            String move = reader.readLine();
 
-                        send("BET " + move);
+                            send("BET " + move);
+                        }
+                    }
+
+                    if (incoming.contains("BET")) {
+                        logger.announceBet(incoming);
                     }
                 }
 
-                if (incoming.contains("BET")) {
-                    logger.announceBet(incoming);
+                if (incoming.contains("WINNER")) {
+                    logger.announceWinner(Integer.parseInt(incoming.split(" ")[2]));
+                } else {
+                    // GET WINNER
+                    String winnerString = get();
+                    int winner = Utilities.getArgument(winnerString);
+                    logger.announceWinner(winner);
                 }
             }
-
-            // GET WINNER
-            String winnerString = get();
-            int winner = Utilities.getArgument(winnerString);
-            logger.announceWinner(winner);
 
             // GET MONEY
             String moneyString = get();
@@ -160,7 +171,7 @@ public class Client {
 
             // GET END
             logger.askForContinue();
-            reader = new BufferedReader(new InputStreamReader(System.in));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             String move = reader.readLine();
 
             if (move.equals("y")) {
@@ -169,6 +180,7 @@ public class Client {
                 send("QUIT");
                 break;
             }
+
         }
     }
 
